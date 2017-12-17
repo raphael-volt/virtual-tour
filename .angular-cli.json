@@ -19,7 +19,8 @@
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "app",
       "styles": [
-        "styles.css"
+        "styles.css",
+        "../libs/vti-icons/style.css"
       ],
       "scripts": [],
       "environmentSource": "environments/environment.ts",
