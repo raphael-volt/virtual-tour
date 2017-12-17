@@ -1,1 +1,9 @@
-/* You can add global styles to this file, and also import other style files */
+html {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.vti {
+    cursor: pointer;
+    color:#D8D8D8;
+    text-shadow: 5px 5px 5px rgba(0, 0, 0, 0.7);
+}
