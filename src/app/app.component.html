@@ -2,11 +2,12 @@
     <h1 appTitle></h1>
     <div class="layout" appResize>
         <router-outlet></router-outlet>
-        <div class="nav-bar" *ngIf="hasNavBar" style="font-size: 40px">
+        <building-selector [active]="hasNavBar" (change)="buildingChange($event)"></building-selector>
+        <div class="nav-bar" [class.on]="hasNavBar" style="font-size: 40px">
             <i class="vti vti-play" routerLink="/video"></i>
             <i class="vti vti-360" routerLink="/360"></i>
             <i class="vti vti-carousel" routerLink="/images"></i>
         </div>
-        <i *ngIf="hasHome" class="vti vti-home" (click)="homeClick()"></i>
+        <i [class.on]="hasHome" class="vti vti-home" (click)="homeClick()"></i>
     </div>
 </div>

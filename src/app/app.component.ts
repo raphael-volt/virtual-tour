@@ -1,5 +1,7 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AppService } from "./app.service";
+import { Building } from "./shared/model";
 import { ResizeService } from "./shared/resize.service";
 @Component({
   selector: 'app-root',
@@ -9,6 +11,7 @@ import { ResizeService } from "./shared/resize.service";
 export class AppComponent implements AfterViewInit {
   title = 'Les Ballons';
   constructor(
+    private router: Router,
     private appService: AppService,
     private resizeService: ResizeService) {
       resizeService.padding = 10
@@ -29,5 +32,8 @@ export class AppComponent implements AfterViewInit {
     this.appService.hasHomeChange.subscribe(home => this.hasHome = home)
     this.appService.hasNavBarChange.subscribe(navBar => this.hasNavBar = navBar)
     this.resizeService.invalidateSize()
+  }
+  buildingChange(building: Building) {
+    this.router.navigate([`/batiments/` + building.path])
   }
 }

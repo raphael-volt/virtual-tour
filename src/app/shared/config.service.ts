@@ -10,7 +10,14 @@ export class ConfigService {
   private _config: Config
   private _turnAround: TurnAround
 
-  constructor(private http: Http) { }
+  private _touchEnable: boolean
+  get touchEnable(): boolean {
+    return this._touchEnable
+  }
+
+  constructor(private http: Http) { 
+    this._touchEnable = Boolean('ontouchstart' in window || navigator.msMaxTouchPoints)
+  }
 
   get turnAround(): TurnAround {
     return this._turnAround

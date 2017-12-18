@@ -4,15 +4,24 @@
 
 i.vti.vti-home {
     position: absolute;
-    display: block!important;
     top: 20px;
     left: 20px;
+    transform: translateX(-150%);
+    transition-duration: 300ms;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
+}
+i.vti.vti-home.on {
+    transform: translateX(0%);
+    transition-duration: 300ms;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
 }
 
+
 h1 {
-    margin: 20px 0;
+    margin: 10px 0;
     padding: 0;
-    outline: 1px solid dodgerblue;
     outline-offset: -1px;
 
     font-weight: unset;
@@ -22,7 +31,13 @@ div.layout {
     position: relative;
     background-color: grey;
 }
-
+div.nav-bar.on {
+    transform: translateY(0%);
+    transition-duration: 300ms;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
+    pointer-events: all;
+}
 div.nav-bar {
     display: -webkit-box;
     display: -moz-box;
@@ -57,6 +72,11 @@ div.nav-bar {
     bottom: 10px;
     left: 10px;
     right: 10px;
+
+    transform: translateY(150%);
+    transition-duration: 300ms;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
 }
 
 div.nav-bar > i {
@@ -75,15 +95,3 @@ div.nav-bar > i {
     -ms-flex-item-align: auto;
     align-self: auto;
 }
-/*
-    Legacy Firefox implementation treats all flex containers
-    as inline-block elements.
-    
-    @-moz-document url-prefix() {
-        div.nav-bar {
-            width: 100%;
-            -moz-box-sizing: border-box;
-        }
-        
-    }
-    */

@@ -14,16 +14,18 @@ export class ConfigComponent extends DeactivableComponent implements OnInit {
         super()
     }
 
-    protected setConfig(config: Config) {
-
-    }
+    protected config: Config
+    protected setConfig(config: Config) { }
     
     ngOnInit() {
-        if (this.configService.hasConfig)
-            this.setConfig(this.configService.config)
+        if (this.configService.hasConfig) {
+            this.config = this.configService.config
+            this.setConfig(this.config)
+        }
         else {
             let sub: Subscription = this.configService.getConfig()
                 .subscribe(config => {
+                    this.config = config
                     sub.unsubscribe()
                     this.setConfig(config)
                 })
