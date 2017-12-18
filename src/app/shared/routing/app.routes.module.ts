@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
-import { BuildingsComponent } from "../../buildings/buildings.component";
+import { BuildingComponent } from "../../building/building.component";
 import { CarouselComponent } from "../../carousel/carousel.component";
 import { TurnAroundComponent } from "../../turn-around/turn-around.component";
 import { YoutubeComponent } from "../../youtube/youtube.component";
@@ -11,13 +11,14 @@ const routes: Routes = [
     children: [
       {
         path: "batiments/:id",
-        component: BuildingsComponent,
+        component: BuildingComponent,
         canDeactivate: [AppRoutesGuard]
       },
       
       {
         path: "video",
-        component: YoutubeComponent
+        component: YoutubeComponent,
+        canDeactivate: [AppRoutesGuard]
       },
       
       {

@@ -1,9 +1,29 @@
 html {
     font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+body, html {
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
 
-.vti {
+div {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+i.vti {
+    font-size: 60px;
     cursor: pointer;
     color:#D8D8D8;
     text-shadow: 5px 5px 5px rgba(0, 0, 0, 0.7);
+}
+
+body {
+    outline: 1px solid tomato;
+    outline-offset: -1px;
+    position: relative;
 }

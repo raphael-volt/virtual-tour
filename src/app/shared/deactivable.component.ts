@@ -7,8 +7,6 @@ import { Observable, Observer } from "rxjs";
 })
 export class DeactivableComponent {
 
-  constructor() { }
-
   deactivate(): Observable<boolean> {
     return Observable.create((observer: Observer<boolean>) => {
       console.log(this.constructor.name + " will deactivate in 1000ms")

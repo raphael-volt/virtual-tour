@@ -1,18 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { DeactivableComponent } from "../shared/deactivable.component";
-
+import { ConfigComponent } from "../shared/config.component";
+import { Config, TurnAround } from "../shared/model";
 @Component({
   selector: 'app-turn-around',
   templateUrl: './turn-around.component.html',
   styleUrls: ['./turn-around.component.css']
 })
-export class TurnAroundComponent extends DeactivableComponent implements OnInit {
+export class TurnAroundComponent extends ConfigComponent implements OnInit {
 
-  constructor() { 
-    super()
+  protected setConfig(config:Config) {
+    
   }
-
-  ngOnInit() {
-  }
-
 }

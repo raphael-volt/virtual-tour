@@ -10,20 +10,38 @@ import {
 } from '@angular/forms';
 
 import { AppRoutesModule } from "./shared/routing/app.routes.module";
+
+// services
+import { ConfigService } from "./shared/config.service";
+import { AppService } from "./app.service";
+import { ResizeService } from "./shared/resize.service";
+
+// components & directives
 import { AppComponent } from './app.component';
-import { BuildingsComponent } from './buildings/buildings.component';
+import { BuildingComponent } from './building/building.component';
 import { BuildingSelectorComponent } from './building-selector/building-selector.component';
 import { CarouselComponent } from './carousel/carousel.component';
 import { YoutubeComponent } from './youtube/youtube.component';
 import { TurnAroundComponent } from './turn-around/turn-around.component';
+import { AppTitleDirective } from './app-title.directive';
+import { ResizeDirective } from './shared/resize.directive';
+import { SafePipe } from './youtube/safe.pipe';
+import { VAlignDirective } from './shared/v-align.directive';
+import { SizeBaseDirective } from './shared/size-base.directive';
+
 @NgModule({
   declarations: [
     AppComponent,
-    BuildingsComponent,
+    BuildingComponent,
     BuildingSelectorComponent,
     CarouselComponent,
     YoutubeComponent,
-    TurnAroundComponent
+    TurnAroundComponent,
+    AppTitleDirective,
+    ResizeDirective,
+    SafePipe,
+    VAlignDirective,
+    SizeBaseDirective
   ],
   imports: [
     BrowserModule,
@@ -32,7 +50,11 @@ import { TurnAroundComponent } from './turn-around/turn-around.component';
     HttpModule,
     AppRoutesModule
   ],
-  providers: [],
+  providers: [
+    ConfigService,
+    AppService,
+    ResizeService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

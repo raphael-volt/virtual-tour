@@ -1,13 +1,12 @@
-<h1><i class="vti vti-home" routerLink="/"></i>{{title}}</h1>
-<ul>
-    <li><a routerLink="/batiments/a">Bâtiment A</a></li>
-    <li><a routerLink="/batiments/a-bis">Bâtiment A-bis</a></li>
-    <li><a routerLink="/batiments/b">Bâtiment B</a></li>
-    <li><a routerLink="/batiments/c">Bâtiment C</a></li>
-</ul>
-<div style="font-size: 40px">
-    <i class="vti vti-play" routerLink="/video"></i>    
-    <i class="vti vti-360" routerLink="/360"></i>    
-    <i class="vti vti-carousel" routerLink="/images"></i>    
+<div class="app-container" vAlign>
+    <h1 appTitle></h1>
+    <div class="layout" appResize>
+        <router-outlet></router-outlet>
+        <div class="nav-bar" *ngIf="hasNavBar" style="font-size: 40px">
+            <i class="vti vti-play" routerLink="/video"></i>
+            <i class="vti vti-360" routerLink="/360"></i>
+            <i class="vti vti-carousel" routerLink="/images"></i>
+        </div>
+        <i *ngIf="hasHome" class="vti vti-home" (click)="homeClick()"></i>
+    </div>
 </div>
-<router-outlet></router-outlet>

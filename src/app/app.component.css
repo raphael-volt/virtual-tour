@@ -1,0 +1,89 @@
+.app-container {
+    position: absolute;
+}
+
+i.vti.vti-home {
+    position: absolute;
+    display: block!important;
+    top: 20px;
+    left: 20px;
+}
+
+h1 {
+    margin: 20px 0;
+    padding: 0;
+    outline: 1px solid dodgerblue;
+    outline-offset: -1px;
+
+    font-weight: unset;
+}
+
+div.layout {
+    position: relative;
+    background-color: grey;
+}
+
+div.nav-bar {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-direction: normal;
+    -moz-box-direction: normal;
+    -webkit-box-orient: horizontal;
+    -moz-box-orient: horizontal;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -webkit-box-pack: justify;
+    -moz-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-align-content: stretch;
+    -ms-flex-line-pack: stretch;
+    align-content: stretch;
+    -webkit-box-align: start;
+    -moz-box-align: start;
+    -webkit-align-items: flex-start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+}
+
+div.nav-bar > i {
+    
+    -webkit-box-ordinal-group: 1;
+    -moz-box-ordinal-group: 1;
+    -webkit-order: 0;
+    -ms-flex-order: 0;
+    order: 0;
+    -webkit-box-flex: 0;
+    -moz-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    -webkit-align-self: auto;
+    -ms-flex-item-align: auto;
+    align-self: auto;
+}
+/*
+    Legacy Firefox implementation treats all flex containers
+    as inline-block elements.
+    
+    @-moz-document url-prefix() {
+        div.nav-bar {
+            width: 100%;
+            -moz-box-sizing: border-box;
+        }
+        
+    }
+    */
