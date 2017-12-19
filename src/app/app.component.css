@@ -30,6 +30,12 @@ h1 {
 div.layout {
     position: relative;
     background-color: grey;
+    overflow: hidden;
+}
+.router-outlet-container, building-selector {
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 div.nav-bar.on {
     transform: translateY(0%);
@@ -69,9 +75,9 @@ div.nav-bar {
     align-items: flex-start;
 
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
 
     transform: translateY(150%);
     transition-duration: 300ms;

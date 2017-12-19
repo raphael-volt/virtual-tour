@@ -27,12 +27,12 @@ export class ResizeService {
   }
   private invalidateSizeFlag: any = false
   invalidateSize = (event?) => {
-    if(! this._configRect) {
-      if(this.invalidateSizeFlag === false)
+    if (!this._configRect) {
+      if (this.invalidateSizeFlag === false)
         this.invalidateSizeFlag = true
       return
     }
-    if(this.invalidateSizeFlag === false)
+    if (this.invalidateSizeFlag === false)
       this.invalidateSizeFlag = window.requestAnimationFrame(() => {
         this.validateSize(window.innerWidth, window.innerHeight)
         this.invalidateSizeFlag = false
@@ -44,7 +44,7 @@ export class ResizeService {
       return null
     return this._layoutRect.clone
   }
-  
+
   get windowRect(): Rect {
     if (!this._windowRect)
       return null
@@ -63,11 +63,11 @@ export class ResizeService {
   private _windowRect: Rect
   layoutChange: EventEmitter<Rect> = new EventEmitter<Rect>()
   constructor(configService: ConfigService) {
-    
+
     this._windowRect = new Rect(0, 0, window.innerWidth, window.innerHeight)
     let handle = () => {
       window.addEventListener("resize", this.resizeHandler)
-      if(this.invalidateSizeFlag) {
+      if (this.invalidateSizeFlag) {
         this.resizeHandler()
         this.invalidateSizeFlag = false
       }
@@ -85,18 +85,18 @@ export class ResizeService {
       checkBody()
       */
     }
-    
-    
+
+
     let initRect = (layout: Layout) => {
       this._configRect = new Rect(0, 0, layout.width, layout.height)
       this._layoutRect = this._configRect.clone
     }
-    
+
     if (configService.hasConfig) {
       initRect(configService.config.layout)
       handle()
     }
-    
+
     else {
       let sub = configService.getConfig().subscribe(config => {
         initRect(config.layout)
@@ -109,8 +109,13 @@ export class ResizeService {
   private resizeHandler = (event?: Event) => {
     this.validateSize(window.innerWidth, window.innerHeight)
   }
-  
+  private lastSizes: [number, number] = [0, 0]
+
   private validateSize(ww: number, wh: number) {
+    // if (this.lastSizes[0] == ww && this.lastSizes[1] == wh)
+    //   return
+    this.lastSizes[0] = ww
+    this.lastSizes[1] = wh
     const wr = this._windowRect
     const p: number = this._padding || 0
     wr.setSize(ww - p * 2, wh - p * 2)
@@ -118,7 +123,7 @@ export class ResizeService {
     let lr: Rect = wr.letterBox(this._configRect.clone)
     let bounds = this.titleElement ? new Bounds(this.titleElement) : null
     if (bounds) {
-      if(bounds.totalHeight + lr.height > wr.height) {
+      if (bounds.totalHeight + lr.height > wr.height) {
         const s: number = (wr.height - bounds.totalHeight) / lr.height
         lr.scale(s, s)
         lr.y = bounds.totalHeight

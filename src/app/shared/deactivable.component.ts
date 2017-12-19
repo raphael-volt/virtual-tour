@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Observable, Observer } from "rxjs";
+import { AppService } from "../app.service";
 @Component({
   selector: 'app-deactivable',
   template: '<span><span>',
@@ -7,15 +8,17 @@ import { Observable, Observer } from "rxjs";
 })
 export class DeactivableComponent {
 
+  constructor(protected appService: AppService) {
+
+  }
+
+  setDeactivable(value: boolean) {
+    this.appService.hasHome = value
+  }
+
   deactivate(): Observable<boolean> {
-    return Observable.create((observer: Observer<boolean>) => {
-      console.log(this.constructor.name + " will deactivate in 1000ms")
-      setTimeout(() => {
-        console.log(this.constructor.name + " deactivated")
-        observer.next(true)
-        observer.complete()
-      }, 1000);
-    })
+    this.setDeactivable(false)
+    return Observable.of(true)
   }
 
 }

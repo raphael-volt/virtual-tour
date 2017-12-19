@@ -1,4 +1,18 @@
 const PX: string = 'px'
+
+const PERCENT: string = "%"
+const CSS_NUM_PART = /^(\d+)(\w+)$/
+const CSS_PX_NUM_PART = /^(\d+)px$/
+
+const parseCSSSizePX = (val: string): number => {
+    if (CSS_PX_NUM_PART.test(val)) {
+        const res = CSS_NUM_PART.exec(val)
+        return Number(res[1])
+    }
+    return NaN
+
+}        
+
 const px = (value: number, floor: boolean = true): string => {
     if (floor)
         value = Math.floor(value)
@@ -75,4 +89,22 @@ class Bounds {
     }
 }
 
-export { PX, px, px2num, Bounds }
+const getComputedBounds = (target: Element): [number, number] => {
+    const style = window.getComputedStyle(target)
+    return [parseCSSSizePX(style.width), parseCSSSizePX(style.height)]
+}
+
+
+const parseCSSSize = (val: string): [number, string] | null => {
+    if (CSS_NUM_PART.test(val)) {
+        const res = CSS_NUM_PART.exec(val)
+        return [Number(res[1]), String(res[2])]
+    }
+    return null
+}
+
+export { 
+    getComputedBounds, parseCSSSize, parseCSSSizePX, 
+    PERCENT, CSS_NUM_PART, CSS_PX_NUM_PART,
+    PX, px, px2num, Bounds
+}

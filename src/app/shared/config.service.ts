@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Appartement, Config, Building, Carousel, TurnAround, Subscription } from "./model";
+import { IAppartement, Config, Building, Carousel, TurnAround, Subscription } from "./model";
 import { Observable, Observer } from "rxjs";
 import { Http } from "@angular/http";
 
-const ASSETS: string = "assets/"
+const ASSETS: string = "assets"
+const join = (...args: string[]): string => {
+  return [ASSETS].concat(args).join("/")
+}
+export { join }
 @Injectable()
 export class ConfigService {
 
@@ -15,14 +19,14 @@ export class ConfigService {
     return this._touchEnable
   }
 
-  constructor(private http: Http) { 
+  constructor(private http: Http) {
     this._touchEnable = Boolean('ontouchstart' in window || navigator.msMaxTouchPoints)
   }
 
   get turnAround(): TurnAround {
     return this._turnAround
   }
-  
+
   get config(): Config {
     return this._config
   }
@@ -38,7 +42,7 @@ export class ConfigService {
   getConfig(): Observable<Config> {
     if (this._config)
       return Observable.of<Config>(this._config)
-    return this.http.get(ASSETS + "config.json").map(request => {
+    return this.http.get(join("config.json")).map(request => {
       this._config = request.json()
       return this._config
     })
@@ -54,8 +58,12 @@ export class ConfigService {
     return Observable.create((observer: Observer<TurnAround>) => {
       let sub: Subscription
       let getTa = (config: Config) => {
-        return this.http.get(ASSETS + config.turnAround.path + "/frames.json").map(request => {
+        return this.http.get(join(config.turnAround.path, "frames.json")).map(request => {
           this._turnAround = request.json()
+          this._turnAround.frames = this._turnAround.frames.map(f=>{
+            f.src = join(config.turnAround.path, f.src)
+            return f
+          })
           return this._turnAround
         }).subscribe(turnAround => {
           observer.next(turnAround)
@@ -87,8 +95,8 @@ export class ConfigService {
     })
   }
 
-  findBuildingByPath(path:string): Building {
-    if(! this.hasConfig)
+  findBuildingByPath(path: string): Building {
+    if (!this.hasConfig)
       throw new Error('Config is not defined.')
     let result: Building
     for (result of this.config.buildings) {

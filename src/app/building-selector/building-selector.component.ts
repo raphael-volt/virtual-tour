@@ -1,6 +1,7 @@
-import { Component, ViewChild, Output, Input, 
+import {
+  Component, ViewChild, Output, Input,
   EventEmitter, ElementRef, AfterViewInit,
-  OnChanges, SimpleChanges 
+  OnChanges, SimpleChanges
 } from '@angular/core';
 import { ConfigComponent } from "../shared/config.component";
 import { Config, Building } from "../shared/model";
@@ -9,7 +10,7 @@ import { Config, Building } from "../shared/model";
   templateUrl: './building-selector.component.html',
   styleUrls: ['./building-selector.component.scss']
 })
-export class BuildingSelectorComponent extends ConfigComponent implements AfterViewInit, OnChanges  {
+export class BuildingSelectorComponent extends ConfigComponent implements AfterViewInit, OnChanges {
 
   @Output()
   change: EventEmitter<Building> = new EventEmitter<Building>()
@@ -130,7 +131,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
       this.animateZoneTouch(target)
     }
     let i = this.zones.indexOf(target)
-    if(i != -1)
+    if (i != -1)
       this.change.emit(this.buildings[i])
   }
 
@@ -193,23 +194,19 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   bgState: "none" | "loading" | "loaded" = "none"
   backgroundProgress = (event: ProgressEvent): boolean => {
     if (this.bgState != "loading") {
-      this.bgState = "loading"  
+      this.bgState = "loading"
     }
     this.backgroundLoadingProgress = Math.round(event.loaded / event.total * 100)
     return true
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if(changes.active || changes.enabled) {
-      console.log("change active:" + changes.active + ", enabled:" + changes.enabled)
-      console.log("BuildingSelectorComponent active:" + this.active + ", enabled:" + this.enabled)
-      if(this.active === true && this.enabled === true) {
+    if (changes.active || changes.enabled) {
+      if (this.active === true && this.enabled === true) {
         this.disabled = false
       }
       else this.disabled = true
     }
-    if(changes.disabled)
-      console.log("BuildingSelectorComponent changes.disabled:" + changes.disabled.currentValue + ", disabled:" + this.disabled)
   }
   @Input()
   active: boolean = false
@@ -220,7 +217,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
     this.bg.classList.add("loaded")
     this.enabled = true
     this.ngOnChanges({
-      enabled: {currentValue: true, firstChange: true, previousValue: false, isFirstChange: () => true}
+      enabled: { currentValue: true, firstChange: true, previousValue: false, isFirstChange: () => true }
     })
     this.loaded.emit(true)
   }

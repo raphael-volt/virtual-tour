@@ -9,8 +9,9 @@ import { Config } from "../shared/model";
 export class YoutubeComponent extends ConfigComponent {
 
   youtubeUrl: string
-  protected setConfig(config: Config){
+  protected setConfig(config: Config) {
+    super.setConfig(config)
     this.youtubeUrl = config.video.projectVideo
+    this.setDeactivable(true)
   }
-
 }

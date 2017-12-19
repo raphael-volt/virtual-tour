@@ -16,8 +16,12 @@ export class AppComponent implements AfterViewInit {
     private resizeService: ResizeService) {
       resizeService.padding = 10
   }
+
+  private loadingChange = (loading: boolean)=> {
+
+  }
+
   homeClick() {
-    console.log("homeClick")
     this.appService.router.navigate(["/"])
   }
 

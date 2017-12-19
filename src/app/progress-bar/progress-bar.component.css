@@ -1,0 +1,25 @@
+.pb-overlay {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    opacity: 0;
+}
+.bar, .track { 
+    height: 6px;
+    margin: 0;
+    padding: 0;
+}
+
+.bar {
+    z-index: 999;
+    background-color: white;
+    width: 50%;
+    margin: 0 25%;
+    box-shadow: 2px 2px 4px 5px rgba(0, 0, 0, 0.3)
+}
+
+.track {
+    background-color: dodgerblue;
+    width: 0%;
+}

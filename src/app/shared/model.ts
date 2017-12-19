@@ -1,4 +1,5 @@
-export interface Appartement {
+
+export interface IAppartement {
     name: string
     position: [number, number]
 }
@@ -7,7 +8,7 @@ export interface Building {
     path: string
     name: string
     image: string
-    items: Appartement[]
+    items: IAppartement[]
 }
 export interface Layout {
     width: number

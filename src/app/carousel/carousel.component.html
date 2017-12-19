@@ -1,3 +1,9 @@
-<p>
-  carousel works!
-</p>
+<div appResize class="carousel ctn" [class.on]="active">
+  <canvas #canvas></canvas>
+  <div class="v-box left" #prevBox (click)="prev()">
+    <i class="vti vti-prev"></i>
+  </div>
+  <div class="v-box right" #nextBox (click)="next()">
+    <i class="vti vti-next"></i>
+  </div>
+</div>
