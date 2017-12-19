@@ -29,6 +29,8 @@ import { TurnAroundDirective } from './turn-around/turn-around.directive';
 import { AppartIconDirective } from "./appart-icon.directive";
 import { VideoLoaderDirective } from './building/video-loader.directive';
 
+import { DeactivableComponent } from "./shared/deactivable.component";
+import { ConfigComponent } from "./shared/config.component";
 import { BuildingComponent } from './building/building.component';
 import { BuildingSelectorComponent } from './building-selector/building-selector.component';
 import { CarouselComponent } from './carousel/carousel.component';
@@ -50,6 +52,8 @@ import { FadeDirective } from './fade.directive';
     SizeBaseDirective,
     VideoLoaderDirective,
     AppartIconDirective,
+    DeactivableComponent,
+    ConfigComponent,
     BuildingComponent,
     BuildingSelectorComponent,
     CarouselComponent,

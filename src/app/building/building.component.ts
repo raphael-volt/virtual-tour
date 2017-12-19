@@ -70,7 +70,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
     this.hasBackgroung = (this.bgLoaded && this.inFinish)
   }
 
-  private backgroundLoaded() {
+  backgroundLoaded() {
     this.bgLoaded = true
     this.checkBackgroundVisibility()
   }
