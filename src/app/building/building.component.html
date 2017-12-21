@@ -1,5 +1,5 @@
 <div appResize class="ctn">
-    <video [class.on]="!hasBackgroung" [videoLoader]="videoUrl" (change)="videoChange($event)"></video>
+    <video [videoLoader]="videoUrl" (change)="videoChange($event)"></video>
     <img #bgImg [class.on]="hasBackgroung" (load)="backgroundLoaded()"/>
     <i [class.on]="hasBackgroung" class="vti vti-info" *ngFor="let i of items" [aptIcon]="i" [scaleFactor]="scaleFactor"></i>
 </div>

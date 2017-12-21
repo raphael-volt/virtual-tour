@@ -2,7 +2,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpModule } from "@angular/http";
-import { HttpClientModule } from "@angular/common/http";
 import {
   FormControl,
   FormGroup,
@@ -16,7 +15,7 @@ import { ConfigService } from "./shared/config.service";
 import { AppService } from "./app.service";
 import { ResizeService } from "./shared/resize.service";
 import { Loader } from "./shared/loader";
-
+import { ImgLoaderService } from "./turn-around/img-loader.service";
 import { AppComponent } from './app.component';
 // components & directives
 import { SizeBaseDirective } from './shared/size-base.directive';
@@ -67,14 +66,14 @@ import { FadeDirective } from './fade.directive';
     BrowserAnimationsModule,
     FormsModule,
     HttpModule,
-    HttpClientModule,
     AppRoutesModule
   ],
   providers: [
     ConfigService,
     AppService,
     ResizeService,
-    Loader
+    Loader,
+    ImgLoaderService
   ],
   bootstrap: [AppComponent]
 })

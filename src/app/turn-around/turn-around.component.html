@@ -1,1 +1,1 @@
-<canvas appResize [turnAround]="imageList"></canvas>
+<canvas appResize [class.active]="canTurn" [turnAround]="imageList" [animFps]="animFps" (activeChange)="activeChangeHandler($event)"></canvas>

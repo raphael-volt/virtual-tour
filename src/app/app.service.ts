@@ -61,7 +61,7 @@ export class AppService {
   public set loading(v : boolean) {
     if((v !== true && v !== false) || v == this._loading)
       return
-    // console.log("LOADING", v)
+    //console.log("LOADING", v)
     this._loading = v;
     this.loadingChange.emit(v)
   }

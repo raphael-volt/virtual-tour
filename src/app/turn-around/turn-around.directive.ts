@@ -11,6 +11,9 @@ const fr = Math.round(1000 / 30)
 })
 export class TurnAroundDirective implements OnChanges {
 
+  @Output()
+  activeChange: EventEmitter<boolean> = new EventEmitter<boolean>()
+
   constructor(
     private resizeSrvice: ResizeService,
     private appService: AppService,
@@ -21,8 +24,8 @@ export class TurnAroundDirective implements OnChanges {
       this._ctx = getContext(this._canvas)
       resizeSrvice.layoutChange.subscribe(sizes => {
         if (this.currentImage) {
-          this.showImageAt(this.currentImageIndex)
           this.calculateMouseIncrement()
+          this.showImageAt(this.currentImageIndex)
         }
       })
     }
@@ -38,6 +41,8 @@ export class TurnAroundDirective implements OnChanges {
 
   @Input()
   turnAround: HTMLImageElement[]
+  @Input()
+  animFps: number = 24
 
   private closeAnim
   close(): Observable<boolean> {
@@ -48,39 +53,38 @@ export class TurnAroundDirective implements OnChanges {
 
         return obs.error("closing in progress")
       }
-      if(this.animData) {
+      if (this.animData) {
         this.animData.tween.reset()
         this.animData.target.remove()
         this.animData = null
       }
+      this._canvas.removeEventListener("mousedown", this.canvasMouseDown)
       const maxI = this.turnAround.length - 1
       const direction =
         (this.currentImageIndex < maxI / 2) ?
           -1 : 1
-      let cb = () => {
-        const ci = this.currentImageIndex
-        let t: number = direction * 3
+      this.closeAnim = 1
+      new RAFHelper(
+        this.animFps,
+        () => {
+          const ci = this.currentImageIndex
+          let i: number = ci + direction
+          if (i < 0 || i > maxI) {
+            this.loop = false
+            this.render()
+            this.closeAnim = null
+            obs.next(true)
+            obs.complete()
+            return true
+          }
 
-        let i: number = ci + t
-        if (i < 0 || i > maxI) {
-          this.showImageAt(0)
-          clearInterval(this.closeAnim)
-          this.loop = false
-          this.render()
-          this.closeAnim = null
-          obs.next(true)
-          return obs.complete()
-        }
-
-        this.updateView(t)
-      }
-      this.closeAnim = setInterval(cb, 1000 / 24)
+          return false
+        }, () => {
+          this.updateView(direction)
+        })
     })
   }
 
-  private stopAnim() {
-
-  }
   private animData: {
     target: HTMLElement,
     tween: Tween
@@ -218,12 +222,13 @@ export class TurnAroundDirective implements OnChanges {
           case "end":
             sub.unsubscribe()
             // Done
-            ms.remove()
+            ms.parentElement.removeChild(ms)
             this.animData = null
             this._canvas.addEventListener("mousedown", this.canvasMouseDown)
             this.loop = true
             this.appService.showTurnAroundAnimation = false
             window.requestAnimationFrame(this.render)
+            this.activeChange.emit(true)
             break;
           default:
             break;
@@ -238,23 +243,36 @@ export class TurnAroundDirective implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    const change: SimpleChange = changes.turnAround
+    let change: SimpleChange = changes.turnAround
     if (change) {
       let val = change.currentValue
       if (val) {
-        this._canvas.addEventListener("mousedown", this.canvasMouseDown)
         this.calculateMouseIncrement()
-        if(this.appService.showTurnAroundAnimation)
-          this.startAnim()
-        else {
-          this._canvas.addEventListener("mousedown", this.canvasMouseDown)
-          this.loop = true
-          window.requestAnimationFrame(this.render)
-        }
+        const n: number = this.turnAround.length
+        let rafH: RAFHelper = new RAFHelper(
+          this.animFps,
+          () => {
+            if (this.currentImageIndex == n - 1) {
+              this.showImageAt(0, true)
+              if (this.appService.showTurnAroundAnimation)
+                this.startAnim()
+              else {
+                this._canvas.addEventListener("mousedown", this.canvasMouseDown)
+                this.loop = true
+                window.requestAnimationFrame(this.render)
+                this.activeChange.emit(true)
+              }
+              return true
+            }
+            return false
+          },
+          () => {
+            this.showImageAt(this.currentImageIndex + 1, true)
+          })
       }
     }
   }
-  
+
   private downPos: [number, number] = [0, 0]
   private currentImage: HTMLImageElement
   private currentImageIndex: number = 0
@@ -305,7 +323,8 @@ export class TurnAroundDirective implements OnChanges {
     this.showImageAt(i)
   }
 
-  
+
+  private lastDrawed: number
   private showImageAt(index: number, forceRender: boolean = false) {
 
     if (isNaN(index)) {
@@ -333,6 +352,7 @@ export class TurnAroundDirective implements OnChanges {
   render = () => {
     if (this.renderFlag) {
       drawToCanvas(this._canvas, this.currentImage, this._ctx)
+
       this.renderFlag = false
     }
     if (this.loop)
@@ -394,3 +414,26 @@ const clearCanvas = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): 
 }
 
 export { drawToCanvas }
+
+class RAFHelper {
+  constructor(fps: number, private cancelFunc: () => boolean, private handler: () => void) {
+    this.then = Date.now()
+    this.interval = 1000 / fps
+    window.requestAnimationFrame(this.rafCallback)
+  }
+  private now: number
+  private then: number
+  private interval: number
+
+  private rafCallback = () => {
+    if (!this.cancelFunc()) {
+      window.requestAnimationFrame(this.rafCallback)
+      this.now = Date.now()
+      let delta = this.now - this.then
+      if (delta > this.interval) {
+        this.then = this.now - (delta % this.interval)
+        this.handler()
+      }
+    }
+  }
+}

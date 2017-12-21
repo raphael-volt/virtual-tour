@@ -1,10 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { AppService } from "../app.service";
-import {
-    HttpClient, HttpRequest, HttpHeaders, HttpEvent, HttpEventType,
-    HttpProgressEvent
-} from "@angular/common/http";
-
 import { Observer, Observable } from "rxjs";
 import { Subscription, TurnAroundFrame } from "./model";
 export class LoaderEvent {
@@ -50,218 +45,76 @@ const isStringArray = (x: any[]): x is string[] => {
 export class Loader {
 
     constructor(
-        private httpClient: HttpClient,
         private appService: AppService) { }
 
-    private listMap: {
-        [id: string]: HTMLImageElement[]
-    } = {}
-    loadList(urls: string[] | TurnAroundFrame[], id?: string): Observable<HTMLImageElement[]> {
-        return Observable.create((observer: Observer<HTMLImageElement[]>) => {
-            if (id && this.listMap[id]) {
-                observer.next(this.listMap[id])
-                return observer.complete()
-            }
-            let frames: TurnAroundFrame[]
-            if (isStringArray(urls)) {
-                frames = urls.map(s => {
-                    return {
-                        src: s,
-                        size: NaN
-                    }
-                })
-            }
-            else {
-                if (isTurnAroundFrameArray(urls)) {
-                    frames = urls
-                }
-            }
-            if (!frames)
-                return observer.error("Invalide urls")
-            this.initLoadList(observer, frames, id)
-        })
-    }
-
-    private cancelChange: EventEmitter<void> = new EventEmitter<void>()
-    private cancelObserver: Observer<void>
-    cancel(): Observable<void> {
-        return Observable.create((o: Observer<void>) => {
-            this.cancelObserver = o
-            this.cancelChange.emit()
-        })
-
-    }
-    private initLoadList(observer: Observer<HTMLImageElement[]>, frames: TurnAroundFrame[], id: string) {
-        const appService = this.appService
-        let result: HTMLImageElement[] = []
-        let sub: Subscription
-        let canceled: boolean = false
-        let cancelSub: Subscription = this.cancelChange.subscribe(() => {
-            canceled = true
-        })
-        const resolve = (err?) => {
-            cancelSub.unsubscribe()
-            appService.loading = false
-            if (err) {
-                this.appService.loading = false
-                if (sub && !sub.closed)
-                    sub.unsubscribe()
-
-                return observer.error(err)
-            }
-            if (result && id)
-                this.listMap[id] = result
-            observer.next(result)
-            observer.complete()
-        }
-        let numFrames: number = frames.length
-        let total: number = 0
-        let f: TurnAroundFrame
-        let checkProgress: boolean = true
-        for (f of frames) {
-            if (isNaN(f.size)) {
-                for (f of frames)
-                    f.size = 1
-                checkProgress = false
-                total = NaN
-                break
-            }
-            total += f.size
-        }
-        let progress: number = 0
-        if (isNaN(total)) {
-            total = numFrames
-        }
-        let index: number = 0
-        let img: HTMLImageElement
-        const loadHandler = (e: Event) => {
-            img.removeEventListener("loaded", loadHandler)
-            result.push(img)
-            progress += frames[index].size
-            index++
-            next()
-        }
-        appService.loading = true
-        const next = () => {    
-            if (canceled) {
-                this.cancelObserver.next(null)
-                this.cancelObserver.complete()
-                this.cancelObserver = null
-                result = null
-                return resolve()
-            }
-            if (index < numFrames) {
-                sub = this.load(frames[index].src, checkProgress)
-                    .subscribe(event => {
-                        event.prevented = true
-                        if (event.type == "progress") {
-                            const p: number = progress + f.size * event.progress
-                            appService.loadingProgress = p / total
-                        }
-                        else {
-                            if (event.type == "dataUrl") {
-                                sub.unsubscribe()
-                                img = new Image()
-                                img.addEventListener("load", loadHandler)
-                                img.src = event.urlData
-                            }
-                        }
-                    },
-                    resolve,
-                    () => {
-
-                    })
-            }
-            else {
-                resolve()
-            }
-        }
-        next()
-    }
-    load(url, checkProgress: boolean = true): Observable<LoaderEvent> {
+    loadDataUrl(url: string, checkProgress: boolean = true): Observable<LoaderEvent> {
         return Observable.create((observer: Observer<LoaderEvent>) => {
-            const appService = this.appService
-            let event: LoaderEvent
-            // appService.loading = true
-            let sub: Subscription = this.getBlob(url, checkProgress)
-                .subscribe(
-                e => {
-                    observer.next(e)
-                    if (!e.prevented)
-                        appService.loadingProgress = e.progress
-                    if (e.type == "end")
-                        event = e
-                },
-                error => {
+            let xhr: XMLHttpRequest = new XMLHttpRequest()
+            xhr.open("GET", url, true)
+            xhr.responseType = "blob"
+            let removeListeners = () => {
+                if (checkProgress)
+                    xhr.removeEventListener("progress", progress)
+                xhr.removeEventListener("load", loadEnd)
+                xhr.removeEventListener("loadstart", loadStart)
+                xhr.removeEventListener("error", error)
+            }
+            let error = (err) => {
+                removeListeners()
+                observer.error(err)
+            }
+            let loadEndFlag: boolean = false
+            let loadEnd = () => {
+                console.log("loadEnd", loadEndFlag)
+                if (loadEndFlag)
+                    return
+                loadEndFlag = true
+                removeListeners()
+                this.readAsDataURL(xhr.response, (data, err) => {
+                    if(err)
+                        return observer.error(err)
                     this.appService.loading = false
-                    observer.error(error)
-                    sub.unsubscribe()
-                },
-                () => {
-                    sub.unsubscribe()
-                    sub = this.getUrlData(event).subscribe(
-                        (e) => { },
-                        observer.error,
-                        () => {
-                            observer.next(event)
-                            if (!event.prevented)
-                                this.appService.loading = false
-                            observer.complete()
-                            sub.unsubscribe()
-                        })
+                    observer.next(new LoaderEvent("dataUrl", 1,null, data))
+                    observer.complete()
+                    
                 })
+            }
+            let progress = (e: ProgressEvent) => {
+                if(e.total)
+                this.appService.loadingProgress = e.loaded / e.total
+                observer.next(new LoaderEvent("progress", this.appService.loadingProgress))
+            }
+            let loadStart = () => {
+                observer.next(new LoaderEvent("start", 0))
+            }
+            xhr.addEventListener("loadstart", loadStart)
+            if (checkProgress)
+                xhr.addEventListener("progress", progress)
+            xhr.addEventListener("load", loadEnd)
+            xhr.addEventListener("error", error)
+            xhr.send()
         })
-    }
-    private getBlob(url: string, checkProgress: boolean): Observable<LoaderEvent> {
-        return Observable.create((obs: Observer<LoaderEvent>) => {
-            let req: HttpRequest<any> = new HttpRequest(
-                "GET",
-                url,
-                {
-                    headers: new HttpHeaders({ 'Content-Type': 'video/mp4' }),
-                    reportProgress: checkProgress,
-                    responseType: "blob",
-                }
-            )
-            this.httpClient.request(req).subscribe((event: HttpEvent<any>) => {
-                const loaderEvent: LoaderEvent = new LoaderEvent()
-                switch (event.type) {
-                    case HttpEventType.DownloadProgress:
-                        loaderEvent.type = "progress"
-                        loaderEvent.progress = event.loaded / event.total
-                        break;
-                    case HttpEventType.Response:
-                        loaderEvent.type = "end"
-                        loaderEvent.blob = event.body
-                        loaderEvent.progress = 1
-                        break;
-                    case HttpEventType.Sent:
-                        loaderEvent.progress = 0
-                        loaderEvent.type = "start"
-                        break;
-                    default:
-                        return;
-                }
-                obs.next(loaderEvent)
-                if (loaderEvent.type == "end")
-                    obs.complete()
-            })
-        })
+
     }
 
-    private getUrlData(event: LoaderEvent): Observable<LoaderEvent> {
-        return Observable.create((observer: Observer<LoaderEvent>) => {
-            let reader = new FileReader()
+    private readAsDataURL(blob: Blob, callback: (data: string, err?) => void) {
 
-            reader.addEventListener("load", () => {
-                event.type = "dataUrl"
-                event.urlData = reader.result
-                event.blob = null
-                observer.next(event)
-                observer.complete()
-            })
-            reader.addEventListener("error", (error: ErrorEvent) => observer.error(error))
-            reader.readAsDataURL(event.blob)
-        })
+        let reader = new FileReader()
+        let removeListeners = () => {
+            reader.removeEventListener("load", load)
+            reader.removeEventListener("error", error)
+        }
+        let load = () => {
+            removeListeners()
+            callback(reader.result)
+        }
+        let error = (err) => {
+            removeListeners()
+            callback(null, err)
+        }
+
+        reader.addEventListener("load", load)
+        reader.addEventListener("error", error)
+        reader.readAsDataURL(blob)
     }
 }

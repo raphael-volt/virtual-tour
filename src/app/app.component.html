@@ -6,9 +6,9 @@
             <router-outlet></router-outlet>
         </div>
         <div class="nav-bar" [class.on]="hasNavBar" style="font-size: 40px">
-            <i class="vti vti-play" routerLink="/video"></i>
-            <i class="vti vti-360" routerLink="/360"></i>
-            <i class="vti vti-carousel" routerLink="/images"></i>
+            <i class="vti vti-play" (click)="navigate('/video')"></i>
+            <i class="vti vti-360" (click)="navigate('/360')"></i>
+            <i class="vti vti-carousel" (click)="navigate('/images')"></i>
         </div>
         <i [class.on]="hasHome" class="vti vti-home" (click)="homeClick()"></i>
         <app-progress-bar></app-progress-bar>

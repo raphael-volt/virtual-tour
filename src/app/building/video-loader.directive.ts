@@ -37,8 +37,7 @@ export class VideoLoaderDirective implements OnChanges {
   }
 
   private initLoad() {
-    // this.video.src = this.videoLoader
-    let sub = this.loader.load(this.videoLoader)
+    let sub = this.loader.loadDataUrl(this.videoLoader)
       .subscribe(event => {
         let e: VideoEvent = new VideoEvent()
         switch (event.type) {
@@ -48,6 +47,7 @@ export class VideoLoaderDirective implements OnChanges {
             e.loaded = event.progress
             break
           case "dataUrl":
+            sub.unsubscribe()
             this.video.src = event.urlData
             event.urlData = null
             this.video.load()
@@ -70,16 +70,28 @@ export class VideoLoaderDirective implements OnChanges {
   canplayHandler(event: Event) {
     const ve: VideoEvent = new VideoEvent("begin", 1)
     this.change.emit(ve)
-    this.video.play()
-    this.video.addEventListener("loadedmetadata", ()=>{
-
-    })
+    let promise: any = this.video.play()
+    let timeupdateFlag: boolean = false
+    let fullFiled = () => {
+      if(timeupdateFlag)
+        this.video.removeEventListener("timeupdate", fullFiled)
+      this.change.emit(new VideoEvent("start", 0))
+    } 
+    if(promise && typeof (promise.then) == "function")
+      promise.then(fullFiled)
+    else {
+      timeupdateFlag = true
+      this.video.addEventListener("timeupdate", fullFiled)
+    }
+    
   }
 
   @HostListener('ended', ["$event"])
   endedHandler(event: Event) {
-    if (this.checkUrl)
+    if (this.checkUrl) {
+      this.video.pause()
       this.change.emit(new VideoEvent("finish", 1))
+    }
   }
 
 }

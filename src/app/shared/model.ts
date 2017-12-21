@@ -19,12 +19,10 @@ export interface Config {
     layout: Layout
     name: string
     video: {
-        extension: string,
+        extension: string
         projectVideo: string
     }
-    turnAround: {
-        path: string
-    }
+    turnAround: TurnAround
     carousel: Carousel
 }
 
@@ -34,15 +32,14 @@ export interface Carousel {
 }
 
 export interface TurnAround {
-    frames: TurnAroundFrame[]
+    animFramerate: number
+    path: string
+    frames?: TurnAroundFrame[]
 }
 
 export interface TurnAroundFrame {
     src: string
     size: number
-    loaded?: number
-    target?: HTMLImageElement
-    complete?: boolean
 }
 
 import { Subscription } from "rxjs/Subscription";

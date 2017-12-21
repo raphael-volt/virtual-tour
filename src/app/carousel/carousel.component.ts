@@ -402,7 +402,7 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
 
   getImage(index: number): Observable<HTMLImageElement> {
     return Observable.create((o: Observer<HTMLImageElement>) => {
-      let sub: Subscription = this.loader.load(this.urls[index])
+      let sub: Subscription = this.loader.loadDataUrl(this.urls[index])
         .subscribe(event => {
           if (event.type == "dataUrl") {
             sub.unsubscribe()

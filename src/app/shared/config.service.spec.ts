@@ -53,7 +53,7 @@ describe('ConfigService', () => {
 
   it('should get TurnAround', async(
     inject([ConfigService], (service: ConfigService) => {
-      let sub: Subscription = service.getTurnAround().subscribe(turnAround => {
+      let sub: Subscription = service.getTurnAroundFrames().subscribe(turnAround => {
         expect(sub).not.toBeUndefined
         expect(sub.closed).toBeFalsy
         expect(turnAround).not.toBeUndefined
@@ -90,7 +90,7 @@ describe('ConfigService', () => {
         sub.unsubscribe()
         expect(sub.closed).toBeTruthy
         sub = undefined
-        sub = service.getTurnAround().subscribe(ta=>{
+        sub = service.getTurnAroundFrames().subscribe(ta=>{
           expect(sub).not.toBeUndefined
           expect(sub.closed).toBeFalsy
           sub.unsubscribe()

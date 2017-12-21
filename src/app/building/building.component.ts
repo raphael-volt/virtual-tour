@@ -63,8 +63,8 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
   }
 
   private bgLoaded: boolean = false
-  private inFinish: boolean
-  hasBackgroung: boolean
+  private inFinish: boolean = false
+  hasBackgroung: boolean = false
 
   private checkBackgroundVisibility = () => {
     this.hasBackgroung = (this.bgLoaded && this.inFinish)
@@ -90,7 +90,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
     }
 
     if (event.type == "begin" && !this.deactivator) {
-      let sub: Subscription = this.loader.load(join(this.building.path, this.building.image))
+      let sub: Subscription = this.loader.loadDataUrl(join(this.building.path, this.building.image), false)
         .subscribe(
         event => {
           if(! this.inFinish)
@@ -104,7 +104,10 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
 
     if (event.type == "begin" && this.deactivator) {
       this.inFinish = false
-      this.checkBackgroundVisibility()
+      window.requestAnimationFrame(()=>{
+        this.checkBackgroundVisibility()
+      })
+      
       return
     }
   }

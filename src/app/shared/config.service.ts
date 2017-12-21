@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IAppartement, Config, Building, Carousel, TurnAround, Subscription } from "./model";
+import { IAppartement, Config, Building, Carousel, TurnAround, TurnAroundFrame, Subscription } from "./model";
 import { Observable, Observer } from "rxjs";
 import { Http } from "@angular/http";
 
@@ -51,22 +51,24 @@ export class ConfigService {
   getCarousel(): Observable<Carousel> {
     return this.getConfig().map(config => config.carousel)
   }
-
-  getTurnAround(): Observable<TurnAround> {
-    if (this._turnAround)
-      return Observable.of<TurnAround>(this._turnAround)
-    return Observable.create((observer: Observer<TurnAround>) => {
+  private _turnAroundFramesFlag: boolean = false
+  getTurnAroundFrames(): Observable<TurnAroundFrame[]> {
+    if (this._turnAroundFramesFlag)
+      return Observable.of<TurnAroundFrame[]>(this._turnAround.frames)
+    return Observable.create((observer: Observer<TurnAroundFrame[]>) => {
       let sub: Subscription
       let getTa = (config: Config) => {
+        this._turnAround = config.turnAround
         return this.http.get(join(config.turnAround.path, "frames.json")).map(request => {
-          this._turnAround = request.json()
+          this._turnAround.frames = request.json().frames
           this._turnAround.frames = this._turnAround.frames.map(f=>{
             f.src = join(config.turnAround.path, f.src)
             return f
           })
           return this._turnAround
         }).subscribe(turnAround => {
-          observer.next(turnAround)
+          this._turnAround = turnAround
+          observer.next(turnAround.frames)
           observer.complete()
           sub.unsubscribe()
         })

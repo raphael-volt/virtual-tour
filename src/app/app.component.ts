@@ -24,6 +24,9 @@ export class AppComponent implements AfterViewInit {
   homeClick() {
     this.appService.router.navigate(["/"])
   }
+  navigate(path) {
+    this.appService.router.navigate([path])
+  }
 
   hasHome: boolean = false
   hasNavBar: boolean = true
@@ -38,6 +41,6 @@ export class AppComponent implements AfterViewInit {
     this.resizeService.invalidateSize()
   }
   buildingChange(building: Building) {
-    this.router.navigate([`/batiments/` + building.path])
+    this.navigate(`/batiments/` + building.path)
   }
 }

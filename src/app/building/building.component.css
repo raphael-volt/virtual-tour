@@ -4,16 +4,29 @@
 .ctn > * {
     position: absolute;
 }
+/*
 .ctn > video, .ctn img {
     display: none;
 }
 .ctn > video.on, .ctn > img.on {
     display: block;
 }
+*/
 img {
     width: 100%;
     height: 100%;
-    display: none;
+    opacity: 0;
+}
+/*
+video {
+    opacity: 0;
+}
+video.on {
+    opacity: 1;
+}
+*/
+img.on {
+    opacity: 1;
 }
 
 i {
