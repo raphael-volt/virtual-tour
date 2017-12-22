@@ -65,7 +65,6 @@ export class Loader {
             }
             let loadEndFlag: boolean = false
             let loadEnd = () => {
-                console.log("loadEnd", loadEndFlag)
                 if (loadEndFlag)
                     return
                 loadEndFlag = true

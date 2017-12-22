@@ -46,6 +46,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
     return Observable.create((observer: Observer<boolean>) => {
       this.deactivator = observer
       this.setDeactivable(false)
+      this.checkBackgroundVisibility()
       this.videoUrl = join(this.building.path, "out." + this.config.video.extension)
     })
   }
@@ -65,9 +66,11 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
   private bgLoaded: boolean = false
   private inFinish: boolean = false
   hasBackgroung: boolean = false
+  hasAppartement: boolean = false
 
   private checkBackgroundVisibility = () => {
     this.hasBackgroung = (this.bgLoaded && this.inFinish)
+    this.hasAppartement = (this.hasBackgroung && !this.deactivator)
   }
 
   backgroundLoaded() {
@@ -104,11 +107,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
 
     if (event.type == "begin" && this.deactivator) {
       this.inFinish = false
-      window.requestAnimationFrame(()=>{
-        this.checkBackgroundVisibility()
-      })
-      
-      return
+      this.checkBackgroundVisibility()
     }
   }
 

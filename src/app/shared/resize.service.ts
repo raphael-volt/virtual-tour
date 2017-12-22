@@ -120,7 +120,7 @@ export class ResizeService {
     const p: number = this._padding || 0
     wr.setSize(ww - p * 2, wh - p * 2)
     wr.setPosition(p, p)
-    let lr: Rect = wr.letterBox(this._configRect.clone)
+    let lr: Rect = wr.letterBox(this._configRect.clone, 1)
     let bounds = this.titleElement ? new Bounds(this.titleElement) : null
     if (bounds) {
       if (bounds.totalHeight + lr.height > wr.height) {

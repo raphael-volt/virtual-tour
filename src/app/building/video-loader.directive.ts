@@ -73,17 +73,17 @@ export class VideoLoaderDirective implements OnChanges {
     let promise: any = this.video.play()
     let timeupdateFlag: boolean = false
     let fullFiled = () => {
-      if(timeupdateFlag)
+      if (timeupdateFlag)
         this.video.removeEventListener("timeupdate", fullFiled)
       this.change.emit(new VideoEvent("start", 0))
-    } 
-    if(promise && typeof (promise.then) == "function")
+    }
+    if (promise && typeof (promise.then) == "function")
       promise.then(fullFiled)
     else {
       timeupdateFlag = true
       this.video.addEventListener("timeupdate", fullFiled)
     }
-    
+
   }
 
   @HostListener('ended', ["$event"])
