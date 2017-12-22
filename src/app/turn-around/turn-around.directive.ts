@@ -106,7 +106,7 @@ export class TurnAroundDirective implements OnChanges {
     ms.style.opacity = "0"
     ms.style.color = "dodgerblue"
     const incX: number = this.resizeSrvice.layoutRect.width / 4
-    const delay: number = 200
+    const delay: number = 500
     const transD: number = 30
     const fadeD: number = 20
     let tw: Ease = new Ease(0, 1, fadeD, Sine.in)
@@ -117,7 +117,7 @@ export class TurnAroundDirective implements OnChanges {
     }
     const n: number = this.turnAround.length
     const updateCanvas = (e: TweenEvent) => {
-      const x: number = Math.round(e.currentValue - pos[0])
+      const x: number = -Math.round(e.currentValue - pos[0])
       let t: number = Math.round(x * this.mouseInc)
       t = this.validateIndex(t)
       try {
@@ -211,30 +211,37 @@ export class TurnAroundDirective implements OnChanges {
 
     // fade out
     const startAnim5 = () => {
-      tw.set(1, 0, fadeD)
-      tween.reset()
-      sub = tween.change.subscribe(e => {
-        switch (e.type) {
-          case "change":
-            ms.style.opacity = String(e.currentValue)
-            break;
+      ms.classList.remove("vti-mouse-l")
+      ms.classList.add("vti-mouse")
+      setTimeout(() => {
+        tw.set(1, 0, fadeD)
+        tween.reset()
+        sub = tween.change.subscribe(e => {
+          switch (e.type) {
+            case "change":
+              ms.style.opacity = String(e.currentValue)
+              break;
+  
+            case "end":
+              sub.unsubscribe()
+              // Done
+              ms.parentElement.removeChild(ms)
+              this.animData = null
+              this._canvas.addEventListener("mousedown", this.canvasMouseDown)
+              this.loop = true
+              this.appService.showTurnAroundAnimation = false
+              window.requestAnimationFrame(this.render)
+              this.activeChange.emit(true)
+              break;
+            default:
+              break;
+          }
+        })
+        tween.start()
 
-          case "end":
-            sub.unsubscribe()
-            // Done
-            ms.parentElement.removeChild(ms)
-            this.animData = null
-            this._canvas.addEventListener("mousedown", this.canvasMouseDown)
-            this.loop = true
-            this.appService.showTurnAroundAnimation = false
-            window.requestAnimationFrame(this.render)
-            this.activeChange.emit(true)
-            break;
-          default:
-            break;
-        }
-      })
-      tween.start()
+      }, delay)
+
+      
     }
 
 
@@ -248,6 +255,7 @@ export class TurnAroundDirective implements OnChanges {
       let val = change.currentValue
       if (val) {
         this.calculateMouseIncrement()
+  
         const n: number = this.turnAround.length
         let rafH: RAFHelper = new RAFHelper(
           this.animFps,
@@ -269,7 +277,7 @@ export class TurnAroundDirective implements OnChanges {
           () => {
             this.showImageAt(this.currentImageIndex + 1, true)
           })
-      }
+        }
     }
   }
 
