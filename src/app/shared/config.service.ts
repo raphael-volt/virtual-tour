@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IAppartement, Config, Building, Carousel, TurnAround, TurnAroundFrame, Subscription } from "./model";
 import { Observable, Observer } from "rxjs";
+import 'rxjs/add/operator/map'
 import { Http } from "@angular/http";
 
 const ASSETS: string = "assets"
