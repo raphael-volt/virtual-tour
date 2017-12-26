@@ -4,6 +4,7 @@ import { Observable, Observer } from "rxjs";
 import { Ease, Sine, TweenEventType, Tween, TweenEvent } from "../shared/tween/ease";
 import { ResizeService } from "../shared/resize.service";
 import { AppService } from "../app.service";
+import { ConfigService } from "../shared/config.service";
 const fr = Math.round(1000 / 30)
 
 @Directive({
@@ -17,6 +18,7 @@ export class TurnAroundDirective implements OnChanges {
   constructor(
     private resizeSrvice: ResizeService,
     private appService: AppService,
+    private configService: ConfigService,
     canvasRef: ElementRef
   ) {
     if (canvasRef.nativeElement instanceof HTMLCanvasElement) {
@@ -44,6 +46,52 @@ export class TurnAroundDirective implements OnChanges {
   @Input()
   animFps: number = 24
 
+  get touchEnable(): boolean {
+    return this.configService.touchEnable
+  }
+  private handleMouseDown(active: boolean) {
+    const touchEnable = this.touchEnable
+    if (active) {
+      if (touchEnable)
+        this._canvas.addEventListener("touchstart", this.canvasMouseDown)
+      else
+        this._canvas.addEventListener("mousedown", this.canvasMouseDown)
+
+    }
+    else {
+      if (touchEnable)
+        this._canvas.removeEventListener("touchstart", this.canvasMouseDown)
+      else
+        this._canvas.removeEventListener("mousedown", this.canvasMouseDown)
+    }
+  }
+  private handleMouseMove(active: boolean) {
+    const touchEnable = this.touchEnable
+    if (active) {
+      if (touchEnable) {
+        this._canvas.addEventListener("touchmove", this.canvasMouseMove)
+        this._canvas.addEventListener("touchend", this.canvasMouseUp)
+        this._canvas.addEventListener("touchcancel", this.canvasMouseLeave)
+      }
+      else {
+        this._canvas.addEventListener("mousemove", this.canvasMouseMove)
+        this._canvas.addEventListener("mouseup", this.canvasMouseUp)
+        this._canvas.addEventListener("mouseleave", this.canvasMouseLeave)
+      }
+    }
+    else {
+      if (touchEnable) {
+        this._canvas.removeEventListener("touchmove", this.canvasMouseMove)
+        this._canvas.removeEventListener("touchend", this.canvasMouseUp)
+        this._canvas.removeEventListener("touchcancel", this.canvasMouseLeave)
+      }
+      else {
+        this._canvas.removeEventListener("mousemove", this.canvasMouseMove)
+        this._canvas.removeEventListener("mouseup", this.canvasMouseUp)
+        this._canvas.removeEventListener("mouseleave", this.canvasMouseLeave)
+      }
+    }
+  }
   private closeAnim
   close(): Observable<boolean> {
     return Observable.create((obs: Observer<boolean>) => {
@@ -58,7 +106,7 @@ export class TurnAroundDirective implements OnChanges {
         this.animData.target.remove()
         this.animData = null
       }
-      this._canvas.removeEventListener("mousedown", this.canvasMouseDown)
+      this.handleMouseDown(false)
       const maxI = this.turnAround.length - 1
       const direction =
         (this.currentImageIndex < maxI / 2) ?
@@ -83,6 +131,139 @@ export class TurnAroundDirective implements OnChanges {
           this.updateView(direction)
         })
     })
+  }
+
+
+
+  ngOnChanges(changes: SimpleChanges) {
+    let change: SimpleChange = changes.turnAround
+    if (change) {
+      let val = change.currentValue
+      if (val) {
+        this.calculateMouseIncrement()
+
+        const n: number = this.turnAround.length
+        let rafH: RAFHelper = new RAFHelper(
+          this.animFps,
+          () => {
+            if (this.currentImageIndex == n - 1) {
+              this.showImageAt(0, true)
+              if (this.appService.showTurnAroundAnimation)
+                this.startAnim()
+              else {
+                this.handleMouseDown(true)
+                this.loop = true
+                window.requestAnimationFrame(this.render)
+                this.activeChange.emit(true)
+              }
+              return true
+            }
+            return false
+          },
+          () => {
+            this.showImageAt(this.currentImageIndex + 1, true)
+          })
+      }
+    }
+  }
+
+  private downPos: [number, number] = [0, 0]
+  private currentImage: HTMLImageElement
+  private currentImageIndex: number = 0
+
+  updateMousePosition(event: MouseEvent | TouchEvent) {
+    if (event instanceof TouchEvent) {
+      this.downPos = [event.touches[0].clientX, this.currentImageIndex]
+      return
+    }
+    if (event instanceof MouseEvent)
+      this.downPos = [event.clientX, this.currentImageIndex]
+  }
+  private canvasMouseDown = (event: MouseEvent | TouchEvent) => {
+    this.updateMousePosition(event)
+    this.handleMouseMove(true)
+  }
+
+  private canvasMouseMove = (event: MouseEvent | TouchEvent) => {
+    let cx: number
+    if (event instanceof TouchEvent) {
+      cx = event.touches[0].clientX
+    }
+    else
+      cx = event.clientX
+    const delta = (this.downPos[0] - cx) * this.mouseInc
+    let i = this.validateIndex(delta + this.downPos[1])
+    this.showImageAt(i)
+  }
+
+  private canvasMouseUp = (event: MouseEvent) => {
+    this.handleMouseMove(false)
+  }
+
+  private canvasMouseLeave = (event: MouseEvent) => {
+    this.canvasMouseUp(event)
+  }
+
+  private imgSize: [number, number] = [0, 0]
+
+  private clearCanvas(): CanvasRenderingContext2D {
+    this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
+    return this._ctx
+  }
+
+  validateIndex(i: number) {
+    i = Math.round(i)
+    const n: number = this.turnAround.length
+    if (i < 0)
+      i = n + i
+    else if (i >= n)
+      i = i - n
+    return i
+  }
+  updateView(dir: number) {
+
+    let i: number = this.validateIndex(this.currentImageIndex + dir)
+    this.showImageAt(i)
+  }
+
+
+  private lastDrawed: number
+  private showImageAt(index: number, forceRender: boolean = false) {
+
+    if (isNaN(index)) {
+      this.currentImageIndex = 0
+      this.currentImage = null
+      return
+    }
+    const img = this.turnAround[index]
+    this.currentImage = img
+    this.currentImageIndex = index
+    this.renderFlag = true
+    if (forceRender)
+      this.render()
+  }
+
+  private _loop: boolean;
+  public get loop(): boolean {
+    return this._loop;
+  }
+  public set loop(v: boolean) {
+    this._loop = v;
+  }
+
+  private renderFlag: boolean
+  render = () => {
+    if (this.renderFlag) {
+      drawToCanvas(this._canvas, this.currentImage, this._ctx)
+
+      this.renderFlag = false
+    }
+    if (this.loop)
+      window.requestAnimationFrame(this.render)
+  }
+  activate() {
+    this.loop = true
+    this.render()
   }
 
   private animData: {
@@ -221,13 +402,13 @@ export class TurnAroundDirective implements OnChanges {
             case "change":
               ms.style.opacity = String(e.currentValue)
               break;
-  
+
             case "end":
               sub.unsubscribe()
               // Done
               ms.parentElement.removeChild(ms)
               this.animData = null
-              this._canvas.addEventListener("mousedown", this.canvasMouseDown)
+              this.handleMouseDown(true)
               this.loop = true
               this.appService.showTurnAroundAnimation = false
               window.requestAnimationFrame(this.render)
@@ -241,134 +422,12 @@ export class TurnAroundDirective implements OnChanges {
 
       }, delay)
 
-      
+
     }
 
 
     let sub: Subscription = tween.change.subscribe(anim1)
     tween.start()
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    let change: SimpleChange = changes.turnAround
-    if (change) {
-      let val = change.currentValue
-      if (val) {
-        this.calculateMouseIncrement()
-  
-        const n: number = this.turnAround.length
-        let rafH: RAFHelper = new RAFHelper(
-          this.animFps,
-          () => {
-            if (this.currentImageIndex == n - 1) {
-              this.showImageAt(0, true)
-              if (this.appService.showTurnAroundAnimation)
-                this.startAnim()
-              else {
-                this._canvas.addEventListener("mousedown", this.canvasMouseDown)
-                this.loop = true
-                window.requestAnimationFrame(this.render)
-                this.activeChange.emit(true)
-              }
-              return true
-            }
-            return false
-          },
-          () => {
-            this.showImageAt(this.currentImageIndex + 1, true)
-          })
-        }
-    }
-  }
-
-  private downPos: [number, number] = [0, 0]
-  private currentImage: HTMLImageElement
-  private currentImageIndex: number = 0
-
-  private canvasMouseDown = (event: MouseEvent) => {
-    this.downPos = [event.clientX, this.currentImageIndex]
-    this._canvas.addEventListener("mousemove", this.canvasMouseMove)
-    this._canvas.addEventListener("mouseup", this.canvasMouseUp)
-    this._canvas.addEventListener("mouseleave", this.canvasMouseLeave)
-  }
-
-  private canvasMouseMove = (event: MouseEvent) => {
-
-    const delta = (this.downPos[0] - event.clientX) * this.mouseInc
-    let i = this.validateIndex(delta + this.downPos[1])
-    this.showImageAt(i)
-  }
-
-  private canvasMouseUp = (event: MouseEvent) => {
-    this._canvas.removeEventListener("mousemove", this.canvasMouseMove)
-    this._canvas.removeEventListener("mouseup", this.canvasMouseUp)
-    this._canvas.removeEventListener("mouseleave", this.canvasMouseLeave)
-  }
-
-  private canvasMouseLeave = (event: MouseEvent) => {
-    this.canvasMouseUp(event)
-  }
-
-  private imgSize: [number, number] = [0, 0]
-
-  private clearCanvas(): CanvasRenderingContext2D {
-    this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
-    return this._ctx
-  }
-
-  validateIndex(i: number) {
-    i = Math.round(i)
-    const n: number = this.turnAround.length
-    if (i < 0)
-      i = n + i
-    else if (i >= n)
-      i = i - n
-    return i
-  }
-  updateView(dir: number) {
-
-    let i: number = this.validateIndex(this.currentImageIndex + dir)
-    this.showImageAt(i)
-  }
-
-
-  private lastDrawed: number
-  private showImageAt(index: number, forceRender: boolean = false) {
-
-    if (isNaN(index)) {
-      this.currentImageIndex = 0
-      this.currentImage = null
-      return
-    }
-    const img = this.turnAround[index]
-    this.currentImage = img
-    this.currentImageIndex = index
-    this.renderFlag = true
-    if (forceRender)
-      this.render()
-  }
-
-  private _loop: boolean;
-  public get loop(): boolean {
-    return this._loop;
-  }
-  public set loop(v: boolean) {
-    this._loop = v;
-  }
-
-  private renderFlag: boolean
-  render = () => {
-    if (this.renderFlag) {
-      drawToCanvas(this._canvas, this.currentImage, this._ctx)
-
-      this.renderFlag = false
-    }
-    if (this.loop)
-      window.requestAnimationFrame(this.render)
-  }
-  activate() {
-    this.loop = true
-    this.render()
   }
 }
 
@@ -444,4 +503,6 @@ class RAFHelper {
       }
     }
   }
+
+
 }
