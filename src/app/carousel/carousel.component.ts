@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import { ConfigComponent } from "../shared/config.component";
 import { Observable, Observer } from 'rxjs';
-import { Loader } from "../shared/loader";
 import { Tween, TweenEvent, Quadratic, Ease, Linear, interpolate } from "../shared/tween/ease";
 import { Rect } from "../shared/math/rect";
 import { getContext, draw, clearCanvas } from "../shared/util/canvas.util";
@@ -27,7 +26,6 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
   constructor(
     appService: AppService,
     configService: ConfigService,
-    private loader: Loader,
     private sizeService: ResizeService
   ) {
     super(configService, appService)
@@ -402,19 +400,19 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
 
   getImage(index: number): Observable<HTMLImageElement> {
     return Observable.create((o: Observer<HTMLImageElement>) => {
-      let sub: Subscription = this.loader.loadDataUrl(this.urls[index])
-        .subscribe(event => {
-          if (event.type == "dataUrl") {
-            sub.unsubscribe()
-            this.images[index] = new Image()
-            let cb = (e: Event) => {
-              o.next(this.images[index])
-              o.complete()
-            }
-            this.images[index].addEventListener("load", cb)
-            this.images[index].src = event.urlData
-          }
-        })
+      this.images[index] = new Image()
+      let loaded = (e: Event) => {
+        this.images[index].removeEventListener("load", loaded)
+        this.images[index].removeEventListener("progress", progress)
+        o.next(this.images[index])
+        o.complete()
+      }
+      let progress = (event: ProgressEvent) => {
+        this.appService.loadingProgress = event.loaded / event.total
+      }
+      this.images[index].addEventListener("load", loaded)
+      this.images[index].addEventListener("progress", progress)
+      this.images[index].src = this.urls[index]
     })
   }
 

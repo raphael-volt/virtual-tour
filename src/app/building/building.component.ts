@@ -9,7 +9,6 @@ import { Observable, Observer } from 'rxjs';
 import { AppService } from "../app.service"
 import { ResizeService } from "../shared/resize.service";
 import { Rect } from "../shared/math/rect";
-import { Loader, LoaderEvent } from "../shared/loader";
 @Component({
   selector: 'app-building',
   templateUrl: './building.component.html',
@@ -31,8 +30,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
     private route: ActivatedRoute,
     appService: AppService,
     configService: ConfigService,
-    private resizeService: ResizeService,
-    private loader: Loader) {
+    private resizeService: ResizeService) {
     super(configService, appService)
   }
 
@@ -93,16 +91,22 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
     }
 
     if (event.type == "begin" && !this.deactivator) {
-      let sub: Subscription = this.loader.loadDataUrl(join(this.building.path, this.building.image), false)
-        .subscribe(
-        event => {
-          if(! this.inFinish)
-            event.prevented = true
-          if (event.type == "dataUrl") {
-            this.bgImg.src = event.urlData
-          }
-        })
-      return
+      if (!this.bgLoaded) {
+        const loaded = () => {
+          this.bgLoaded = true
+          this.bgImg.removeEventListener("load", loaded)
+          this.bgImg.removeEventListener("progress", progress)
+          this.appService.loading = false
+        }
+
+        const progress = (event: ProgressEvent) => {
+          this.appService.loadingProgress = event.loaded / event.total
+        }
+
+        this.bgImg.addEventListener("load", loaded)
+        this.bgImg.addEventListener("progress", progress)
+        this.bgImg.src = join(this.building.path, this.building.image)
+      }
     }
 
     if (event.type == "begin" && this.deactivator) {
