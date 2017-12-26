@@ -4,7 +4,7 @@ import { ConfigService, join } from "../shared/config.service";
 import { ConfigComponent } from "../shared/config.component";
 import { Config, Building, Subscription } from "../shared/model";
 import { DeactivableComponent } from "../shared/deactivable.component";
-import { VideoEvent } from "./video-loader.directive";
+import { VideoEvent } from "../shared/events/video-event";
 import { Observable, Observer } from 'rxjs';
 import { AppService } from "../app.service"
 import { ResizeService } from "../shared/resize.service";

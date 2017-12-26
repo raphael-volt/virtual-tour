@@ -1,28 +1,28 @@
-import { Directive, ElementRef, HostListener, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { Loader, LoaderEvent } from "../shared/loader";
-export class VideoEvent {
-  constructor(
-    public type?: "start" | "progress" | "complete" | "begin" | "finish",
-    public loaded?: number) {
-  }
-}
-
+import { Directive, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { VideoEvent, VideoEventType } from "../shared/events/video-event";
+import { VideoHandler } from "../shared/net/video-handler";
+import { AppService } from "../app.service";
 @Directive({
   selector: '[videoLoader]'
 })
-export class VideoLoaderDirective implements OnChanges {
+export class VideoLoaderDirective implements OnChanges, OnDestroy {
 
   @Input()
   videoLoader
   @Output()
   change: EventEmitter<VideoEvent> = new EventEmitter<VideoEvent>()
   private video: HTMLVideoElement
-  constructor(ref: ElementRef, private loader: Loader) {
-    this.video = ref.nativeElement
-    this.video.setAttribute('preload', 'none')
-    this.video.setAttribute('width', '100%')
-    this.video.setAttribute('height', '100%')
-    this.video.removeAttribute('autoplay')
+  private videoHandler: VideoHandler
+  constructor(
+    ref: ElementRef,
+    private appService: AppService) {
+    const video: HTMLVideoElement = ref.nativeElement
+    video.setAttribute('width', '100%')
+    video.setAttribute('height', '100%')
+    video.setAttribute("preload", "auto")
+    video.removeAttribute("autoplay")
+    this.video = video
+    this.handle(true)
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -30,68 +30,88 @@ export class VideoLoaderDirective implements OnChanges {
       this.checkUrl()
     }
   }
+  ngOnDestroy() {
+    this.handle(false)
+  }
+
   private checkUrl() {
     let str: string = this.videoLoader
     if (str && str.length)
-      this.initLoad()
+      this.src = this.videoLoader
   }
 
-  private initLoad() {
-    let sub = this.loader.loadDataUrl(this.videoLoader)
-      .subscribe(event => {
-        let e: VideoEvent = new VideoEvent()
-        switch (event.type) {
-          case "start":
-          case "progress":
-            e.type = event.type
-            e.loaded = event.progress
-            break
-          case "dataUrl":
-            sub.unsubscribe()
-            this.video.src = event.urlData
-            event.urlData = null
-            this.video.load()
-            return
-          default:
-            return
-        }
-        this.change.emit(e)
-      },
-      error => {
-        console.log('Error', error)
-        sub.unsubscribe()
-      },
-      () => {
-        sub.unsubscribe()
-      })
+
+
+  unhandle() {
+    this.handle(false)
   }
 
-  @HostListener('canplaythrough')
-  canplayHandler(event: Event) {
-    const ve: VideoEvent = new VideoEvent("begin", 1)
-    this.change.emit(ve)
-    let promise: any = this.video.play()
-    let timeupdateFlag: boolean = false
-    let fullFiled = () => {
-      if (timeupdateFlag)
-        this.video.removeEventListener("timeupdate", fullFiled)
-      this.change.emit(new VideoEvent("start", 0))
+  private handle(active) {
+    const video = this.video
+    const f: Function = active ? video.addEventListener : video.removeEventListener
+    f.apply(video, ["canplaythrough", this.canplaythroughHandler, false])
+    f.apply(video, ["progress", this.progressHandler, false])
+  }
+
+  private _src: string;
+  private get src(): string {
+    return this._src;
+  }
+
+  private set src(v: string) {
+    this._src = v;
+    this.video.setAttribute("src", v)
+    this.appService.loading = true
+    this.notify("start")
+  }
+
+  private canplaythroughHandler = (event: MediaStreamEvent) => {
+    const video = this.video
+    const enededHandler = () => {
+      video.removeEventListener("ended", enededHandler, false)
+      this.notify("finish")
     }
-    if (promise && typeof (promise.then) == "function")
-      promise.then(fullFiled)
-    else {
-      timeupdateFlag = true
-      this.video.addEventListener("timeupdate", fullFiled)
+    const playingHandler = (event: Event) => {
+      this.appService.loading = false
+      video.removeEventListener("playing", playingHandler, false)
+      this.notify("begin")
     }
-
+    video.addEventListener("playing", playingHandler, false)
+    video.addEventListener("ended", enededHandler, false)
+    video.play()
+    return false
   }
 
-  @HostListener('ended', ["$event"])
-  endedHandler(event: Event) {
-    if (this.checkUrl) {
-      this.video.pause()
-      this.change.emit(new VideoEvent("finish", 1))
+  private get loaded(): number {
+    const video = this.video
+    const t: number = this.duration
+    if (!video.buffered || !video.buffered.length || isNaN(t)) {
+      return 0
     }
+    let l: number = 0
+    const n: number = video.buffered.length
+    for (let i = 0; i < n; i++) {
+      l += (video.buffered.end(i) - video.buffered.start(i))
+    }
+    return l
   }
 
+  private get duration(): number {
+    const d: number = this.video.duration
+    if (d == undefined || isNaN(d))
+      return 0
+    return d
+  }
+
+  private progressHandler = (event: Event) => {
+    let e = this.notify("progress", this.loaded, this.duration)
+    this.appService.loadingProgress = e.ratio
+    return false
+  }
+  
+  private notify(type: VideoEventType, loaded?: number, total?: number): VideoEvent {
+    let event = new VideoEvent(type, loaded, total)
+    this.change.emit(event)
+    return event
+  }
 }
