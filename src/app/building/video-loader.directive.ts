@@ -1,6 +1,5 @@
 import { Directive, ElementRef, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { VideoEvent, VideoEventType } from "../shared/events/video-event";
-import { VideoHandler } from "../shared/net/video-handler";
 import { AppService } from "../app.service";
 @Directive({
   selector: '[videoLoader]'
@@ -12,7 +11,6 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
   @Output()
   change: EventEmitter<VideoEvent> = new EventEmitter<VideoEvent>()
   private video: HTMLVideoElement
-  private videoHandler: VideoHandler
   constructor(
     ref: ElementRef,
     private appService: AppService) {
