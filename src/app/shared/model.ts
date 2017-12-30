@@ -19,8 +19,8 @@ export interface Config {
     layout: Layout
     name: string
     video: {
-        extension: string
-        projectVideo: string
+        projectVideo: string,
+        formats: string[]
     }
     turnAround: TurnAround
     carousel: Carousel

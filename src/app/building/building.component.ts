@@ -20,6 +20,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
   bgImgRef: ElementRef | undefined
   private bgImg: HTMLImageElement
 
+  videoSources: { src: string, type: string }[] = []
   videoUrl: string = ""
 
   private deactivator: Observer<boolean>
@@ -45,15 +46,44 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
       this.deactivator = observer
       this.setDeactivable(false)
       this.checkBackgroundVisibility()
-      this.videoUrl = join(this.building.path, "out." + this.config.video.extension)
+      this.createSources("out")
     })
   }
-
+  
+  private createSources(prefix: "in" | "out") {
+    let src: { src: string, type: string }[] = []
+    for(let f of this.config.video.formats) {
+      let e: string
+      let t: string
+      switch (f) {
+        case "mp4":      
+        case "webm":
+        e = f
+        t = f
+        break;   
+        case "ogv":
+        e = f
+        t = "ogg"
+        break;
+        default:
+        break;
+      }
+      src.push(
+        {
+          src: join(this.building.path, prefix + "." + e),
+          type: "video/" + t
+        }
+      )
+    }
+    this.videoUrl = src[0].src
+    this.videoSources = src
+  }
+  
   protected setConfig(config: Config) {
     super.setConfig(config)
     let sub: Subscription = this.route.params.subscribe(params => {
       this.building = this.configService.findBuildingByPath(params.id)
-      this.videoUrl = join(this.building.path, "in." + config.video.extension)
+      this.createSources("in")
       if (sub)
         sub.unsubscribe()
     })

@@ -28,6 +28,7 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
       this.checkUrl()
     }
   }
+
   ngOnDestroy() {
     this.handle(false)
   }
@@ -38,8 +39,6 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
       this.src = this.videoLoader
   }
 
-
-
   unhandle() {
     this.handle(false)
   }
@@ -49,6 +48,8 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
     const f: Function = active ? video.addEventListener : video.removeEventListener
     f.apply(video, ["canplaythrough", this.canplaythroughHandler, false])
     f.apply(video, ["progress", this.progressHandler, false])
+    f.apply(video, ["playing", this.playingHandler, false])
+    f.apply(video, ["ended", this.enededHandler, false])
   }
 
   private _src: string;
@@ -56,27 +57,32 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
     return this._src;
   }
 
+  private progressTimer
+
   private set src(v: string) {
     this._src = v;
-    this.video.setAttribute("src", v)
+    this.canplaythroughFlag = false
     this.appService.loading = true
     this.notify("start")
+    this.video.load()
   }
 
-  private canplaythroughHandler = (event: MediaStreamEvent) => {
-    const video = this.video
-    const enededHandler = () => {
-      video.removeEventListener("ended", enededHandler, false)
-      this.notify("finish")
+  private enededHandler = () => {
+    this.notify("finish")
+  }
+
+  private playingHandler = (event: Event) => {
+    this.appService.loadingProgress = 0
+    this.appService.loading = false
+    this.notify("begin")
+  }
+
+  private canplaythroughFlag: boolean = false
+  private canplaythroughHandler = (event?: MediaStreamEvent) => {
+    if (!this.canplaythroughFlag) {
+      this.canplaythroughFlag = true
+      this.video.play()
     }
-    const playingHandler = (event: Event) => {
-      this.appService.loading = false
-      video.removeEventListener("playing", playingHandler, false)
-      this.notify("begin")
-    }
-    video.addEventListener("playing", playingHandler, false)
-    video.addEventListener("ended", enededHandler, false)
-    video.play()
     return false
   }
 
@@ -101,12 +107,16 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
     return d
   }
 
-  private progressHandler = (event: Event) => {
+  private progressHandler = (event?: Event) => {
+    if (this.canplaythroughFlag)
+      return false
     let e = this.notify("progress", this.loaded, this.duration)
     this.appService.loadingProgress = e.ratio
+    if (e.ratio == 1)
+      this.canplaythroughHandler()
     return false
   }
-  
+
   private notify(type: VideoEventType, loaded?: number, total?: number): VideoEvent {
     let event = new VideoEvent(type, loaded, total)
     this.change.emit(event)
