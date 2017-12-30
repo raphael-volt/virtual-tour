@@ -4,13 +4,53 @@
 
 i.vti.vti-home {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    transform: translateX(-150%);
     transition-duration: 300ms;
     transition-property: transform;
     transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
 }
+
+@media screen and (min-width: 1280px) {
+    i.vti.vti-home {
+        top: 20px;
+        left: 20px;
+        transform: translateX(calc(-100% - 25px));
+    }
+    div.nav-bar {
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        transform: translateY(calc(100% + 25px));
+    }
+}
+
+@media screen and (min-width: 640px) and (max-width: 1280px) {
+    i.vti.vti-home {
+        top: 16px;
+        left: 16px;
+        transform: translateX(calc(-100% - 21px));
+    }
+    div.nav-bar {
+        bottom: 16px;
+        left: 16px;
+        right: 16px;
+        transform: translateY(calc(100% + 21px));
+    }
+}
+
+@media screen and (min-width: 200px) and (max-width: 640px) {
+    i.vti.vti-home {
+        top: 10px;
+        left: 10px;
+        transform: translateX(calc(-100% - 15px));
+    }
+    div.nav-bar {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        transform: translateY(calc(100% + 15px));
+    }
+}
+
 i.vti.vti-home.on {
     transform: translateX(0%);
     transition-duration: 300ms;
@@ -18,12 +58,10 @@ i.vti.vti-home.on {
     transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
 }
 
-
 h1 {
     margin: 10px 0;
     padding: 0;
     outline-offset: -1px;
-
     font-weight: unset;
 }
 
@@ -32,11 +70,13 @@ div.layout {
     background-color: grey;
     overflow: hidden;
 }
+
 .router-outlet-container, building-selector {
     position: absolute;
     left: 0;
     top: 0;
 }
+
 div.nav-bar.on {
     transform: translateY(0%);
     transition-duration: 300ms;
@@ -44,6 +84,7 @@ div.nav-bar.on {
     transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
     pointer-events: all;
 }
+
 div.nav-bar {
     display: -webkit-box;
     display: -moz-box;
@@ -73,20 +114,13 @@ div.nav-bar {
     -webkit-align-items: flex-start;
     -ms-flex-align: start;
     align-items: flex-start;
-
     position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-
-    transform: translateY(150%);
     transition-duration: 300ms;
     transition-property: transform;
     transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
 }
 
-div.nav-bar > i {
-    
+div.nav-bar>i {
     -webkit-box-ordinal-group: 1;
     -moz-box-ordinal-group: 1;
     -webkit-order: 0;
