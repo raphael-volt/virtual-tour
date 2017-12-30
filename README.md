@@ -6,4 +6,4 @@ Use `ng serve` command to build and serve the app, then launch one of the tasks 
 
 ## Assets generation
 
-See (virtual-tour-cli project)[https://github.com/raphael-volt/virtual-tour-cli].
+See [virtual-tour-cli project](https://github.com/raphael-volt/virtual-tour-cli).
