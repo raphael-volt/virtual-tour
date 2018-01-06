@@ -1,5 +1,5 @@
 <div appResize [class.noevents]="disabled" #container id="main-selector-container">
-	<img #background src="assets/main.jpg"
+	<img #background [attr.src]="bgUrl"
 		(load)="backgroundLoad($event)"
 		(progress)="backgroundProgress($event)"
 		width="100%" height="100%" />

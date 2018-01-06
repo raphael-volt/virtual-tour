@@ -79,10 +79,7 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
 
   private canplaythroughFlag: boolean = false
   private canplaythroughHandler = (event?: MediaStreamEvent) => {
-    if (!this.canplaythroughFlag) {
-      this.canplaythroughFlag = true
-      this.video.play()
-    }
+    this.video.play()
     return false
   }
 

@@ -2,7 +2,7 @@ import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@ang
 import { ActivatedRoute } from "@angular/router";
 import { ConfigService, join } from "../shared/config.service";
 import { ConfigComponent } from "../shared/config.component";
-import { Config, Building, Subscription } from "../shared/model";
+import { Config, Building, Subscription, ConfigLayout } from "../shared/model";
 import { DeactivableComponent } from "../shared/deactivable.component";
 import { VideoEvent } from "../shared/events/video-event";
 import { Observable, Observer } from 'rxjs';
@@ -36,59 +36,77 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
   }
 
   updateScaleFactor = (layout: Rect) => {
-    this.scaleFactor = layout.width / this.config.layout.width
+    if(! this.resizeService.configLayout)
+      return
+    this.scaleFactor = layout.width / this.resizeService.configLayout.layout.width
   }
 
   private scaleFactor: number = 1
 
   deactivate(): Observable<boolean> {
     return Observable.create((observer: Observer<boolean>) => {
+      this.inFinish = false
       this.deactivator = observer
       this.setDeactivable(false)
-      this.checkBackgroundVisibility()
       this.createSources("out")
     })
   }
-  
+
   private createSources(prefix: "in" | "out") {
-    let src: { src: string, type: string }[] = []
-    for(let f of this.config.video.formats) {
-      let e: string
-      let t: string
-      switch (f) {
-        case "mp4":      
-        case "webm":
-        e = f
-        t = f
-        break;   
-        case "ogv":
-        e = f
-        t = "ogg"
-        break;
-        default:
-        break;
-      }
-      src.push(
-        {
-          src: join(this.building.path, prefix + "." + e),
-          type: "video/" + t
+    let done = (layout: ConfigLayout) => {
+      let src: { src: string, type: string }[] = []
+      for (let f of layout.video.formats) {
+        let t: string = f
+        switch (f) {
+          case "ogv":
+            t = "ogg"
+            break;
         }
-      )
+        src.push(
+          {
+            src: join(layout.name, this.building.path, prefix + "." + f),
+            type: "video/" + t
+          }
+        )
+      }
+      this.videoUrl = src[0].src
+      this.videoSources = src
     }
-    this.videoUrl = src[0].src
-    this.videoSources = src
+    if (this.resizeService.configLayout)
+      done(this.resizeService.configLayout)
+
   }
-  
+
+  private layoutChanged = (layout: ConfigLayout) => {
+    if (!this.inFinish) {
+      this.createSources("in")
+    }
+    else {
+      if (this.deactivator)
+        this.createSources("out")
+      else
+        this.bgImg.setAttribute("src", this.bgURL)
+    }
+  }
   protected setConfig(config: Config) {
     super.setConfig(config)
     let sub: Subscription = this.route.params.subscribe(params => {
       this.building = this.configService.findBuildingByPath(params.id)
-      this.createSources("in")
+      this.resizeService.configLayoutChange.subscribe(this.layoutChanged)
+      if(this.resizeService.configLayout)
+        this.layoutChanged(this.resizeService.configLayout)
       if (sub)
         sub.unsubscribe()
     })
     if (sub.closed)
       sub.unsubscribe()
+  }
+
+  private get bgURL(): string | null {
+    let layout = this.resizeService.configLayout
+    if (!layout || !this.building)
+      return null
+    return join(layout.name, this.building.path, this.building.image)
   }
 
   private bgLoaded: boolean = false
@@ -99,6 +117,8 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
   private checkBackgroundVisibility = () => {
     this.hasBackgroung = (this.bgLoaded && this.inFinish)
     this.hasAppartement = (this.hasBackgroung && !this.deactivator)
+    console.log("BG", this.hasBackgroung)
+    console.log("AP", this.hasAppartement)
   }
 
   backgroundLoaded() {
@@ -121,22 +141,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
     }
 
     if (event.type == "begin" && !this.deactivator) {
-      if (!this.bgLoaded) {
-        const loaded = () => {
-          this.bgLoaded = true
-          this.bgImg.removeEventListener("load", loaded)
-          this.bgImg.removeEventListener("progress", progress)
-          this.appService.loading = false
-        }
-
-        const progress = (event: ProgressEvent) => {
-          this.appService.loadingProgress = event.loaded / event.total
-        }
-
-        this.bgImg.addEventListener("load", loaded)
-        this.bgImg.addEventListener("progress", progress)
-        this.bgImg.src = join(this.building.path, this.building.image)
-      }
+      this.bgImg.setAttribute("src", this.bgURL)
     }
 
     if (event.type == "begin" && this.deactivator) {
@@ -156,6 +161,12 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
 
   ngAfterViewInit() {
     this.bgImg = this.bgImgRef.nativeElement
+    /*
+    this.bgImg.addEventListener("load", () => {
+      this.bgLoaded = true
+      this.checkBackgroundVisibility()
+    })
+    */
   }
 
   ngOnDestroy() {

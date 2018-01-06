@@ -1,13 +1,19 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { ConfigService } from "./config.service";
-import { Config, Layout } from "./model";
+import { Config, Layout, ConfigLayout } from "./model";
 import { Rect } from "./math/rect";
 import { Bounds } from "./util/css.util";
 
 @Injectable()
 export class ResizeService {
 
+  configLayoutChange: EventEmitter<ConfigLayout> = new EventEmitter<ConfigLayout>()
 
+  private _configLayouts: ConfigLayout[]
+  private _configLayout: ConfigLayout
+  get configLayout(): ConfigLayout {
+    return this._configLayout
+  }
   private _padding: number;
   public get padding(): number {
     return this._padding;
@@ -61,30 +67,30 @@ export class ResizeService {
   private _layoutRect: Rect
   private _configRect: Rect
   private _windowRect: Rect
+  private config: Config
   layoutChange: EventEmitter<Rect> = new EventEmitter<Rect>()
-  constructor(configService: ConfigService) {
+  constructor(private configService: ConfigService) {
 
-    this._windowRect = new Rect(0, 0, window.innerWidth, window.innerHeight)
     let handle = () => {
+      this.config = configService.config
+      this._configLayouts = configService.config.layouts
+      this._windowRect = new Rect(0, 0, window.innerWidth, window.innerHeight)
       window.addEventListener("resize", this.resizeHandler)
       if (this.invalidateSizeFlag) {
-        this.resizeHandler()
-        this.invalidateSizeFlag = false
+        this.validateSize(this._windowRect.width, this._windowRect.height)
       }
-      /*
-      let checkBody = () => {
-        if(document && document.body) {
-          window.addEventListener("resize", this.resizeHandler)
-          window.addEventListener("load", this.resizeHandler)
-          window.addEventListener("change", this.resizeHandler)
-        }
-        else {
-          window.requestAnimationFrame(checkBody)
-        }
-      }
-      checkBody()
-      */
     }
+    if (configService.hasConfig) {
+      handle()
+    }
+
+    else {
+      let sub = configService.getConfig().subscribe(config => {
+        sub.unsubscribe()
+        handle()
+      })
+    }
+    /*
 
 
     let initRect = (layout: Layout) => {
@@ -104,6 +110,7 @@ export class ResizeService {
         handle()
       })
     }
+    */
   }
 
   private resizeHandler = (event?: Event) => {
@@ -111,9 +118,38 @@ export class ResizeService {
   }
   private lastSizes: [number, number] = [0, 0]
 
+  private findBestLayout(w: number): boolean {
+    if (!this._configLayouts || w < 10)
+      return false
+
+    let map = this._configLayouts.slice().reverse()
+    let layoutConfig: ConfigLayout
+    for (let i = 0; i < map.length; i++) {
+      // ww 2000 : w:1920
+      // ww 1200 : w:1920
+      // ww 900 : w:960
+      // ww 400 : w:480
+      if (w < map[i].layout.width) {
+        layoutConfig = map[i]
+        break
+      }
+    }
+    if (this._configLayout == layoutConfig)
+      return true
+    this._configLayout = layoutConfig
+    this.configService.config.layout = layoutConfig.layout
+    this._configRect = new Rect(0, 0, layoutConfig.layout.width, layoutConfig.layout.height)
+    this.notifyConfigLayoutFlag = true
+    return true
+  }
+  private notifyConfigLayoutFlag: boolean
   private validateSize(ww: number, wh: number) {
+    if (!this.findBestLayout(ww))
+      return
+    this.invalidateSizeFlag = false
     // if (this.lastSizes[0] == ww && this.lastSizes[1] == wh)
     //   return
+
     this.lastSizes[0] = ww
     this.lastSizes[1] = wh
     const wr = this._windowRect
@@ -135,5 +171,8 @@ export class ResizeService {
     this._layoutRect = lr
 
     this.layoutChange.emit(this._layoutRect.clone)
+    if (this.notifyConfigLayoutFlag)
+      this.configLayoutChange.emit(this._configLayout)
+    this.notifyConfigLayoutFlag = false
   }
 }

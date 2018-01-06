@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { ConfigComponent } from "../shared/config.component";
 import { Config, TurnAround, Subscription, TurnAroundFrame } from "../shared/model";
 import { ImgLoaderService } from "./img-loader.service";
@@ -6,15 +6,17 @@ import { AppService } from "../app.service";
 import { ConfigService } from "../shared/config.service";
 import { Observable, Observer } from "rxjs";
 import { TurnAroundDirective } from "./turn-around.directive";
+import { TurnaroundFramesService } from "../shared/turnaround-frames.service";
 @Component({
   selector: 'app-turn-around',
   templateUrl: './turn-around.component.html',
   styleUrls: ['./turn-around.component.css']
 })
-export class TurnAroundComponent extends ConfigComponent {
+export class TurnAroundComponent extends ConfigComponent implements OnDestroy {
 
   private turnAroundFrames: TurnAroundFrame[]
   constructor(
+    private tafService: TurnaroundFramesService,
     private loader: ImgLoaderService,
     configService: ConfigService,
     appService: AppService) {
@@ -58,33 +60,38 @@ export class TurnAroundComponent extends ConfigComponent {
     this.canTurn = active
   }
   private loaderSub: Subscription
-  protected setConfig(config: Config) {
-    super.setConfig(config)
-    this.animFps = config.turnAround.animFramerate
-    let sub: Subscription = this.configService.getTurnAroundFrames()
-      .subscribe(frames => {
-        this.setDeactivable(true)
-        this.turnAroundFrames = frames
-        
-        if (sub) {
-          sub.unsubscribe()
-          sub = null
-        }
-        this.loaderSub = this.loader.load(frames)
-          .subscribe(imgs => {
-            if (sub)
-              sub.unsubscribe()
-            if (this.loaderSub) {
-              this.loaderSub.unsubscribe()
-              this.loaderSub = null
-            }
-            this.setDeactivable(false)
-            this.imageList = imgs
-          })
-        if (this.loaderSub.closed) {
+  private configLayoutSub: Subscription
+
+  private framesChangeHandler = (frames: TurnAroundFrame[]) => {
+    console.log("TurnAroundComponent.framesChangeHandler")
+    this.setDeactivable(true)
+    this.turnAroundFrames = frames
+    this.loaderSub = this.loader.load(frames)
+      .subscribe(imgs => {
+        if (this.loaderSub) {
           this.loaderSub.unsubscribe()
           this.loaderSub = null
         }
+        this.setDeactivable(false)
+        this.imageList = imgs
       })
+    if (this.loaderSub.closed) {
+      this.loaderSub.unsubscribe()
+      this.loaderSub = null
+    }
   }
+
+  protected setConfig(config: Config) {
+    super.setConfig(config)
+    this.animFps = config.turnAround.animFramerate
+    this.configLayoutSub = this.tafService.framesChange
+      .subscribe(this.framesChangeHandler)
+    if(this.tafService.frames)
+      this.framesChangeHandler(this.tafService.frames)
+  }
+
+  ngOnDestroy() {
+    this.configLayoutSub.unsubscribe()
+  }
+
 }

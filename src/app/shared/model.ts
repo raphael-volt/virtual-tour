@@ -14,17 +14,6 @@ export interface Layout {
     width: number
     height: number
 }
-export interface Config {
-    buildings: Building[]
-    layout: Layout
-    name: string
-    video: {
-        projectVideo: string,
-        formats: string[]
-    }
-    turnAround: TurnAround
-    carousel: Carousel
-}
 
 export interface Carousel {
     path: string
@@ -40,6 +29,28 @@ export interface TurnAround {
 export interface TurnAroundFrame {
     src: string
     size: number
+}
+
+export type VideoEncodeType = "webm" | "mp4" | "ogv"
+
+export interface IVideo {
+    formats: VideoEncodeType[]
+}
+
+export interface ConfigLayout {
+    name: string
+    layout: Layout
+    video: IVideo
+}
+export interface Config {
+    buildings: Building[]
+    layout?: Layout
+    name: string
+    image: string
+    projectVideo: string
+    turnAround: TurnAround
+    carousel: Carousel
+    layouts: ConfigLayout[]
 }
 
 import { Subscription } from "rxjs/Subscription";

@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
-import { IAppartement, Config, Building, Carousel, TurnAround, TurnAroundFrame, Subscription } from "./model";
-import { Observable, Observer } from "rxjs";
+import {
+  IAppartement, Config, Building,
+  Carousel, TurnAround, TurnAroundFrame,
+  ConfigLayout,
+  Subscription
+} from "./model";
+import { Observable, Observer, Subject } from "rxjs";
 import 'rxjs/add/operator/map'
 import { Http } from "@angular/http";
 
@@ -20,7 +25,9 @@ export class ConfigService {
     return this._touchEnable
   }
 
-  constructor(private http: Http) {
+  constructor(
+    private http: Http
+  ) {
     this._touchEnable = Boolean('ontouchstart' in window || navigator.msMaxTouchPoints)
   }
 
@@ -40,48 +47,36 @@ export class ConfigService {
     return this._turnAround != undefined
   }
 
+  private loadingConfigObservers: Observer<Config>[]
+  private loadingConfig: boolean = false
   getConfig(): Observable<Config> {
     if (this._config)
       return Observable.of<Config>(this._config)
-    return this.http.get(join("config.json")).map(request => {
-      this._config = request.json()
-      return this._config
-    })
+    if(! this.loadingConfig){
+      this.loadingConfig = true
+      this.loadingConfigObservers = []
+      return this.http.get(join("config.json")).map(request => {
+        this._config = request.json()
+        // this._config.layout = this._config.layouts[0].layout
+        this.loadingConfig = false
+        for(let o of this.loadingConfigObservers) {
+          o.next(this._config)
+          o.complete()
+        }
+        this.loadingConfigObservers = null
+        return this._config
+      })
+
+    }
+    else {
+      return Observable.create(o=>{
+        this.loadingConfigObservers.push(o)
+      })
+    }
   }
 
   getCarousel(): Observable<Carousel> {
     return this.getConfig().map(config => config.carousel)
-  }
-  private _turnAroundFramesFlag: boolean = false
-  getTurnAroundFrames(): Observable<TurnAroundFrame[]> {
-    if (this._turnAroundFramesFlag)
-      return Observable.of<TurnAroundFrame[]>(this._turnAround.frames)
-    return Observable.create((observer: Observer<TurnAroundFrame[]>) => {
-      let sub: Subscription
-      let getTa = (config: Config) => {
-        this._turnAround = config.turnAround
-        return this.http.get(join(config.turnAround.path, "frames.json")).map(request => {
-          this._turnAround.frames = request.json().frames
-          this._turnAround.frames = this._turnAround.frames.map(f=>{
-            f.src = join(config.turnAround.path, f.src)
-            return f
-          })
-          return this._turnAround
-        }).subscribe(turnAround => {
-          this._turnAround = turnAround
-          observer.next(turnAround.frames)
-          observer.complete()
-          sub.unsubscribe()
-        })
-      }
-      if (this._config)
-        sub = getTa(this._config)
-      else
-        sub = this.getConfig().subscribe(config => {
-          sub.unsubscribe()
-          sub = getTa(config)
-        })
-    })
   }
 
   getBuildings(): Observable<Building[]> {
