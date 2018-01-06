@@ -11,7 +11,7 @@ export class YoutubeComponent extends ConfigComponent {
   youtubeUrl: string
   protected setConfig(config: Config) {
     super.setConfig(config)
-    this.youtubeUrl = config.video.projectVideo
+    this.youtubeUrl = config.projectVideo
     this.setDeactivable(true)
   }
 }

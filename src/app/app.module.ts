@@ -17,6 +17,7 @@ import { ResizeService } from "./shared/resize.service";
 import { Loader } from "./shared/loader";
 import { ImgLoaderService } from "./turn-around/img-loader.service";
 import { AppComponent } from './app.component';
+import { TurnaroundFramesService } from "./shared/turnaround-frames.service";
 // components & directives
 import { SizeBaseDirective } from './shared/size-base.directive';
 import { AppTitleDirective } from './app-title.directive';
@@ -73,7 +74,8 @@ import { FadeDirective } from './fade.directive';
     AppService,
     ResizeService,
     Loader,
-    ImgLoaderService
+    ImgLoaderService,
+    TurnaroundFramesService
   ],
   bootstrap: [AppComponent]
 })

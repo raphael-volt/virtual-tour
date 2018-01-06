@@ -4,7 +4,11 @@ import {
   OnChanges, SimpleChanges
 } from '@angular/core';
 import { ConfigComponent } from "../shared/config.component";
-import { Config, Building } from "../shared/model";
+import { Config, Building, ConfigLayout } from "../shared/model";
+import { ConfigService, join } from "../shared/config.service";
+import { ResizeService } from "../shared/resize.service";
+import { AppService } from "../app.service";
+
 @Component({
   selector: 'building-selector',
   templateUrl: './building-selector.component.html',
@@ -64,9 +68,64 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   @ViewChild("background")
   bgRef: ElementRef | undefined
   private bg: HTMLImageElement
+  bgUrl: string
+
+  @Input()
+  active: boolean = false
+  enabled = false
+  disabled = true
+
+  constructor(
+    configService: ConfigService,
+    appService: AppService,
+    private resizeService: ResizeService) {
+    super(configService, appService)
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.active || changes.enabled) {
+      if (this.active === true && this.enabled === true) {
+        this.disabled = false
+      }
+      else this.disabled = true
+    }
+  }
+
+  backgroundLoad(event: Event) {
+    this.bgState = "loaded"
+    this.bg.classList.add("loaded")
+    this.enabled = true
+    this.ngOnChanges({
+      enabled: { currentValue: true, firstChange: true, previousValue: false, isFirstChange: () => true }
+    })
+    this.loaded.emit(true)
+  }
 
   setConfig(config: Config) {
     this.buildings = config.buildings
+    this.resizeService.configLayoutChange.subscribe(this.updateBgUrl)
+    this.updateBgUrl()
+  }
+
+  private updateBgUrl = (l?:ConfigLayout) => {
+    if(!l)
+      l = this.resizeService.configLayout
+    if (l) {
+      const url: string = join(l.name, this.config.image)
+      if (this.bgUrl != url) {
+        this.bgState = "loading"
+        this.bg.classList.remove("loaded")
+        let enabled = this.enabled
+        if(enabled) {
+          this.enabled = false
+          this.ngOnChanges({
+            enabled: { currentValue: false, firstChange: false, previousValue: true, isFirstChange: () => false }
+          })
+          this.loaded.emit(false)
+        }
+        this.bgUrl = url
+      }
+    }
   }
 
   private buildings: Building[]
@@ -200,25 +259,4 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
     return true
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.active || changes.enabled) {
-      if (this.active === true && this.enabled === true) {
-        this.disabled = false
-      }
-      else this.disabled = true
-    }
-  }
-  @Input()
-  active: boolean = false
-  enabled = false
-  disabled = true
-  backgroundLoad(event: Event) {
-    this.bgState = "loaded"
-    this.bg.classList.add("loaded")
-    this.enabled = true
-    this.ngOnChanges({
-      enabled: { currentValue: true, firstChange: true, previousValue: false, isFirstChange: () => true }
-    })
-    this.loaded.emit(true)
-  }
 }

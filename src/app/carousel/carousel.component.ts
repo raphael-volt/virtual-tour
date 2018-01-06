@@ -12,7 +12,7 @@ import { Point } from "../shared/math/point";
 import { ResizeService } from "../shared/resize.service";
 import { AppService } from "../app.service";
 import { ConfigService, join } from "../shared/config.service";
-import { Subscription, Config } from "../shared/model";
+import { Subscription, Config, ConfigLayout } from "../shared/model";
 
 const DEFAULT_NUMFRAME = 20
 
@@ -26,7 +26,7 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
   constructor(
     appService: AppService,
     configService: ConfigService,
-    private sizeService: ResizeService
+    private ressizeService: ResizeService
   ) {
     super(configService, appService)
   }
@@ -44,7 +44,7 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
     this.active = true
   }
   private beforeDraw() {
-    this.windoSizes = this.sizeService.windowRect
+    this.windoSizes = this.ressizeService.windowRect
     clearCanvas(this._ctx, this._canvas)
     this.updateCanvasSize( )
     this.draw(false)
@@ -54,19 +54,37 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
       return
     this.beforeDraw()
   }
+  private configLayoutChangeHandler = (layout: ConfigLayout) => {
+    let urls: string[] = []
+    let images: HTMLImageElement[] = []
+    for (let i of this.config.carousel.images) {
+      images.push(null)
+      urls.push(join(layout.name, this.config.carousel.path, i))
+    }
+    this.currentIndex = 0
+    this.urls = urls
+    this.checkLoad(NaN, 0)
+    this.active = true
+  }
   private resizeSub: Subscription
+  private configLayoutSub: Subscription
   setConfig(config: Config) {
     super.setConfig(config)
-    this.init()
-    let sub: Subscription = this.sizeService.layoutChange.subscribe(layout => {
+    //this.init()
+    let sub: Subscription = this.ressizeService.layoutChange.subscribe(layout => {
       sub.unsubscribe()
       this.beforeDraw()
-      this.resizeSub = this.sizeService.layoutChange.subscribe(this.resizeHandler)
+      this.resizeSub = this.ressizeService.layoutChange.subscribe(this.resizeHandler)
+      
     })
-    this.sizeService.invalidateSize()
+    this.configLayoutSub = this.ressizeService.configLayoutChange.subscribe(this.configLayoutChangeHandler)
+    if(this.ressizeService.configLayout)
+      this.configLayoutChangeHandler(this.ressizeService.configLayout)
+    this.ressizeService.invalidateSize()
   }
   ngOnDestroy() {
     this.resizeSub.unsubscribe()
+    this.configLayoutSub.unsubscribe()
   }
   active: boolean = false
 
@@ -119,10 +137,10 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
   }
 
   deactivate(): Observable<boolean> {
-    return Observable.create((o: Observer<boolean>) =>{
+    return Observable.create((o: Observer<boolean>) => {
       this.setDeactivable(false)
       this.active = false
-      setTimeout(()=>{
+      setTimeout(() => {
         o.next(true)
         o.complete()
       }, 300)
@@ -150,11 +168,11 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
 
     // Aligned with layout
 
-    const layout: Rect = this.sizeService.layoutRect
-    
+    const layout: Rect = this.ressizeService.layoutRect
+
     this._canvas.width = layout.width
     this._canvas.height = layout.height
-    
+
     /*
     const BW: number = 60
     const wr: Rect = this.sizeService.windowRect
@@ -194,7 +212,7 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
     */
   }
   ngAfterViewInit() {
-    this.windoSizes = this.sizeService.windowRect
+    this.windoSizes = this.ressizeService.windowRect
     this.nextBox = this.nextBoxRef.nativeElement
     this.prevBox = this.prevBoxRef.nativeElement
     this._canvas = this._canvasRef.nativeElement
