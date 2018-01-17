@@ -8,7 +8,7 @@ import { Config, Building, ConfigLayout } from "../shared/model";
 import { ConfigService, join } from "../shared/config.service";
 import { ResizeService } from "../shared/resize.service";
 import { AppService } from "../app.service";
-
+import { MainSvgService } from "./main-svg.service";
 @Component({
   selector: 'building-selector',
   templateUrl: './building-selector.component.html',
@@ -20,46 +20,6 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   change: EventEmitter<Building> = new EventEmitter<Building>()
   @Output()
   loaded: EventEmitter<boolean> = new EventEmitter<boolean>()
-
-  @ViewChild("svg")
-  svgref: ElementRef | undefined
-  private svg: SVGElement
-
-  @ViewChild("z1")
-  z1ref: ElementRef | undefined
-  private z1: SVGElement
-  @ViewChild("z1o")
-  z1OverRef: ElementRef | undefined
-  private z1Over: SVGElement
-
-  @ViewChild("z2")
-  z2ref: ElementRef | undefined
-  private z2: SVGElement
-  @ViewChild("z2o")
-  z2OverRef: ElementRef | undefined
-  private z2Over: SVGElement
-
-  @ViewChild("z3")
-  z3ref: ElementRef | undefined
-  private z3: SVGElement
-  @ViewChild("z3o")
-  z3OverRef: ElementRef | undefined
-  private z3Over: SVGElement
-
-  @ViewChild("z4")
-  z4ref: ElementRef | undefined
-  private z4: SVGElement
-  @ViewChild("z4o")
-  z4OverRef: ElementRef | undefined
-  private z4Over: SVGElement
-
-  @ViewChild("z5")
-  z5ref: ElementRef | undefined
-  private z5: SVGElement
-  @ViewChild("z5o")
-  z5OverRef: ElementRef | undefined
-  private z5Over: SVGElement
-
 
   @ViewChild("container")
   ctnRef: ElementRef | undefined
@@ -78,7 +38,8 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   constructor(
     configService: ConfigService,
     appService: AppService,
-    private resizeService: ResizeService) {
+    private resizeService: ResizeService,
+    private svgService: MainSvgService) {
     super(configService, appService)
   }
 
@@ -107,8 +68,9 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
     this.updateBgUrl()
   }
 
-  private updateBgUrl = (l?:ConfigLayout) => {
-    if(!l)
+
+  private updateBgUrl = (l?: ConfigLayout) => {
+    if (!l)
       l = this.resizeService.configLayout
     if (l) {
       const url: string = join(l.name, this.config.image)
@@ -116,7 +78,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
         this.bgState = "loading"
         this.bg.classList.remove("loaded")
         let enabled = this.enabled
-        if(enabled) {
+        if (enabled) {
           this.enabled = false
           this.ngOnChanges({
             enabled: { currentValue: false, firstChange: false, previousValue: true, isFirstChange: () => false }
@@ -132,35 +94,31 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   private zones: SVGElement[] = []
   private zoneTargets: SVGElement[] = []
 
+  roll: any[] = []
+  shapes: any[] = []
+  overedId: string
+  selectedId: string = null
+
   ngAfterViewInit() {
-    this.z5 = this.z5ref.nativeElement
-    this.z4 = this.z4ref.nativeElement
-    this.z3 = this.z3ref.nativeElement
-    this.z2 = this.z2ref.nativeElement
-    this.z1 = this.z1ref.nativeElement
-    this.z5Over = this.z5OverRef.nativeElement
-    this.z4Over = this.z4OverRef.nativeElement
-    this.z3Over = this.z3OverRef.nativeElement
-    this.z2Over = this.z2OverRef.nativeElement
-    this.z1Over = this.z1OverRef.nativeElement
     this.bg = this.bgRef.nativeElement
     this.ctn = this.ctnRef.nativeElement
-    this.svg = this.svgref.nativeElement
-    let l = [
-      [this.z1, this.z1Over],
-      [this.z2, this.z2Over],
-      [this.z3, this.z3Over],
-      [this.z4, this.z4Over]
-      // [this.z5, this.z5Over]
-    ]
-    for (let row of l) {
-      this.zones.push(row[0])
-      this.zoneTargets.push(row[1])
-      if (!this.configService.touchEnable) {
-        row[0].addEventListener("mouseover", this.zoneOver)
+    this.svgService.load()
+      .subscribe(map => {
+        this.roll = map.roll
+        this.shapes = map.shapes
+      })
+    this.svgService.overedChange.subscribe(id => {
+      this.selectedId = id
+    })
+    this.svgService.selectedChange.subscribe(id => {
+      for (const b of this.config.buildings) {
+        if (b.path == id) {
+          this.change.emit(b)
+          break
+        }
       }
-      row[0].addEventListener("click", this.zoneClick)
-    }
+    })
+
   }
 
   private zoneOver = (event: Event) => {

@@ -50,7 +50,7 @@ describe('ConfigService', () => {
       })
     }))
   )
-
+/*
   it('should get TurnAround', async(
     inject([ConfigService], (service: ConfigService) => {
       let sub: Subscription = service.getTurnAroundFrames().subscribe(turnAround => {
@@ -63,7 +63,7 @@ describe('ConfigService', () => {
       })
     }))
   )
-
+*/
 
   it('testing subscription states using get Carousel, Buildings, TurnAround', async(
     inject([ConfigService], (service: ConfigService) => {
@@ -90,6 +90,7 @@ describe('ConfigService', () => {
         sub.unsubscribe()
         expect(sub.closed).toBeTruthy
         sub = undefined
+        /*
         sub = service.getTurnAroundFrames().subscribe(ta=>{
           expect(sub).not.toBeUndefined
           expect(sub.closed).toBeFalsy
@@ -98,6 +99,7 @@ describe('ConfigService', () => {
         })
         expect(sub).not.toBeUndefined
         expect(sub.closed).toBeFalsy
+        */
       })
     }))
   )

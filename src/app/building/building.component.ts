@@ -117,8 +117,6 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
   private checkBackgroundVisibility = () => {
     this.hasBackgroung = (this.bgLoaded && this.inFinish)
     this.hasAppartement = (this.hasBackgroung && !this.deactivator)
-    console.log("BG", this.hasBackgroung)
-    console.log("AP", this.hasAppartement)
   }
 
   backgroundLoaded() {

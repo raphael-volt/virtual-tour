@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpModule } from "@angular/http";
+import { MainSvgService } from "./building-selector/main-svg.service";
 import {
   FormControl,
   FormGroup,
@@ -39,6 +40,7 @@ import { TurnAroundComponent } from './turn-around/turn-around.component';
 
 import { SafePipe } from './youtube/safe.pipe';
 import { FadeDirective } from './fade.directive';
+import { ZoneEventDirective } from './building-selector/zone-event.directive';
 
 @NgModule({
   declarations: [
@@ -60,7 +62,8 @@ import { FadeDirective } from './fade.directive';
     YoutubeComponent,
     TurnAroundComponent,
     ProgressBarComponent,
-    FadeDirective
+    FadeDirective,
+    ZoneEventDirective
   ],
   imports: [
     BrowserModule,
@@ -75,7 +78,8 @@ import { FadeDirective } from './fade.directive';
     ResizeService,
     Loader,
     ImgLoaderService,
-    TurnaroundFramesService
+    TurnaroundFramesService,
+    MainSvgService
   ],
   bootstrap: [AppComponent]
 })
