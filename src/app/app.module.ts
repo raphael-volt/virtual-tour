@@ -41,6 +41,9 @@ import { TurnAroundComponent } from './turn-around/turn-around.component';
 import { SafePipe } from './youtube/safe.pipe';
 import { FadeDirective } from './fade.directive';
 import { ZoneEventDirective } from './building-selector/zone-event.directive';
+import { AppartementComponent } from './building/appartement/appartement.component';
+import { ImgOnLoadDirective } from './building/appartement/img-on-load.directive';
+import { TestAppartementComponent } from './test-appartement/test-appartement.component';
 
 @NgModule({
   declarations: [
@@ -61,9 +64,12 @@ import { ZoneEventDirective } from './building-selector/zone-event.directive';
     CarouselComponent,
     YoutubeComponent,
     TurnAroundComponent,
+    TestAppartementComponent,
     ProgressBarComponent,
     FadeDirective,
-    ZoneEventDirective
+    ImgOnLoadDirective,
+    ZoneEventDirective,
+    AppartementComponent
   ],
   imports: [
     BrowserModule,

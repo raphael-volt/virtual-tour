@@ -5,6 +5,8 @@ import { CarouselComponent } from "../../carousel/carousel.component";
 import { TurnAroundComponent } from "../../turn-around/turn-around.component";
 import { YoutubeComponent } from "../../youtube/youtube.component";
 import { AppRoutesGuard } from "./app.routes.guard";
+import { TestAppartementComponent } from '../../test-appartement/test-appartement.component';
+
 const routes: Routes = [
   {
     path: "",
@@ -14,7 +16,10 @@ const routes: Routes = [
         component: BuildingComponent,
         canDeactivate: [AppRoutesGuard]
       },
-      
+      {
+        path: "test-app",
+        component: TestAppartementComponent
+      },
       {
         path: "video",
         component: YoutubeComponent,

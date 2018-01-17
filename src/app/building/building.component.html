@@ -3,5 +3,12 @@
         <source *ngFor="let vs of videoSources" [attr.type]="vs.type" [attr.src]="vs.src">
     </video>
     <img #bgImg [class.on]="hasBackgroung" (load)="backgroundLoaded()"/>
-    <i [class.on]="hasAppartement" class="vti vti-info" *ngFor="let i of items" [aptIcon]="i" [scaleFactor]="scaleFactor"></i>
+    <i [class.on]="hasAppartement" 
+    class="vti vti-info" 
+    *ngFor="let a of appartements" 
+    [aptIcon]="a" 
+    [scaleFactor]="scaleFactor"
+    (click)="selectAppartement(a)"
+    ></i>
+    <appartement [selectedAppartement]="selectedAppartement" (close)="appartementClose()"></appartement>
 </div>

@@ -2,7 +2,7 @@ import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@ang
 import { ActivatedRoute } from "@angular/router";
 import { ConfigService, join } from "../shared/config.service";
 import { ConfigComponent } from "../shared/config.component";
-import { Config, Building, Subscription, ConfigLayout } from "../shared/model";
+import { Config, Building, Subscription, ConfigLayout, IAppartement } from "../shared/model";
 import { DeactivableComponent } from "../shared/deactivable.component";
 import { VideoEvent } from "../shared/events/video-event";
 import { Observable, Observer } from 'rxjs';
@@ -45,6 +45,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
 
   deactivate(): Observable<boolean> {
     return Observable.create((observer: Observer<boolean>) => {
+      this.selectedAppartement = null
       this.inFinish = false
       this.deactivator = observer
       this.setDeactivable(false)
@@ -113,7 +114,7 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
   private inFinish: boolean = false
   hasBackgroung: boolean = false
   hasAppartement: boolean = false
-
+  selectedAppartement: IAppartement = undefined
   private checkBackgroundVisibility = () => {
     this.hasBackgroung = (this.bgLoaded && this.inFinish)
     this.hasAppartement = (this.hasBackgroung && !this.deactivator)
@@ -148,15 +149,22 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
     }
   }
 
-  items: any[]
+  appartements: IAppartement[]
 
   private createItems() {
-    this.items = this.building.items
+    this.appartements = this.building.items
     this.resizeSub = this.resizeService.layoutChange
       .subscribe(this.updateScaleFactor)
     this.updateScaleFactor(this.resizeService.layoutRect)
   }
-
+  selectAppartement(a: IAppartement) {
+    this.selectedAppartement = a
+    this.appService.hasHome = false
+  }
+  appartementClose(){
+    this.appService.hasHome = true
+    this.selectedAppartement = null
+  }
   ngAfterViewInit() {
     this.bgImg = this.bgImgRef.nativeElement
     /*

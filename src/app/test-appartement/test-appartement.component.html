@@ -1,0 +1,4 @@
+<div class="main">
+    <button *ngIf="asBtn" (click)="select()">SELECT</button>
+    <appartement [selectedAppartement]="selectedAppartement" (close)="closed()"></appartement>
+</div>

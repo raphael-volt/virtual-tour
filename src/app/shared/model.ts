@@ -2,6 +2,7 @@
 export interface IAppartement {
     name: string
     position: [number, number]
+    image: string
 }
 
 export interface Building {
