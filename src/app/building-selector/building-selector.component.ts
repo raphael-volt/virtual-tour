@@ -28,7 +28,13 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   @ViewChild("background")
   bgRef: ElementRef | undefined
   private bg: HTMLImageElement
-  bgUrl: string
+  bgUrl: string=""
+
+  
+  @ViewChild("svg")
+  svgRef: ElementRef | undefined
+  private svg: SVGElement
+  
 
   @Input()
   active: boolean = false
@@ -70,9 +76,10 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
 
 
   private updateBgUrl = (l?: ConfigLayout) => {
+    
     if (!l)
       l = this.resizeService.configLayout
-    if (l) {
+    if (l && this.bg) {
       const url: string = join(l.name, this.config.image)
       if (this.bgUrl != url) {
         this.bgState = "loading"
@@ -85,9 +92,10 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
           })
           this.loaded.emit(false)
         }
-        this.bgUrl = url
+        this.bg.setAttribute('src', url)
       }
     }
+    
   }
 
   private buildings: Building[]
@@ -100,13 +108,13 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   selectedId: string = null
 
   ngAfterViewInit() {
+    
     this.bg = this.bgRef.nativeElement
     this.ctn = this.ctnRef.nativeElement
-    this.svgService.load()
-      .subscribe(map => {
-        this.roll = map.roll
-        this.shapes = map.shapes
-      })
+    this.svg = this.svgRef.nativeElement
+    this.updateBgUrl()
+    let map = this.svgService.parseSvg(this.svg)
+    
     this.svgService.overedChange.subscribe(id => {
       this.selectedId = id
     })
@@ -118,93 +126,25 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
         }
       }
     })
-
-  }
-
-  private zoneOver = (event: Event) => {
-    let target = this.setZonTargetVisible(event, true)
-    target.addEventListener("mouseout", this.zoneOut)
-  }
-
-  private zoneOut = (event: Event) => {
-    let target = this.setZonTargetVisible(event, false)
-    target.removeEventListener("mouseout", this.zoneOut)
-  }
-
-  private setZonTargetVisible(event: Event, visible: boolean): SVGElement {
-    const i: number = this.zones.indexOf(event.currentTarget as SVGElement)
-    if (!this.configService.touchEnable) {
-      const f: Function = visible ?
-        this.zoneTargets[i].classList.add :
-        this.zoneTargets[i].classList.remove
-      f.apply(this.zoneTargets[i].classList, ["over"])
-    }
-    return this.zones[i]
-  }
-
-  private zoneClick = (event: Event) => {
-    const target: SVGElement = this.setZonTargetVisible(event, false) as SVGElement
-    if (this.configService.touchEnable) {
-      this.animateZoneTouch(target)
-    }
-    let i = this.zones.indexOf(target)
-    if (i != -1)
-      this.change.emit(this.buildings[i])
-  }
-
-  private _animationEvent: string
-  private get animationEvent(): string {
-    if (this._animationEvent)
-      return this._animationEvent
-    let animations = {
-      'WebkitAnimation': 'webkitAnimationEnd',
-      'MozAnimation': 'animationend',
-      'OAnimation': 'oAnimationEnd oanimationend',
-      'msAnimation': 'MSAnimationEnd',
-      'animation': 'animationend'
-    }
-    let t: string;
-    const el = document.createElement('fakeelement')
-    for (t in animations) {
-      if (el.style[t] !== undefined) {
-        break
-      }
-    }
-    this._animationEvent = animations[t]
-    return animations[t]
-  }
-  private _transitionEvent: string
-  private get transitionEvent() {
-    if (this._transitionEvent)
-      return this._transitionEvent
-    let t: string;
-    const el = document.createElement('fakeelement')
-    const transitions = {
-      'transition': 'transitionend',
-      'OTransition': 'oTransitionEnd',
-      'MozTransition': 'transitionend',
-      'WebkitTransition': 'webkitTransitionEnd'
-    }
-
-    for (t in transitions) {
-      if (el.style[t] !== undefined) {
-        break
-      }
-    }
-    this._transitionEvent = transitions[t]
-    return transitions[t]
-  }
-
-  private animateZoneTouch(svg: SVGElement) {
-    if (!svg.classList.contains("zoneOn")) {
-      svg.style.fillOpacity = ".1"
-      svg.style.stroke = "dodgerblue"
-      svg.style.strokeWidth = "3"
-      svg.classList.add("zoneOn")
-      svg.addEventListener(this.animationEvent, (event) => {
-        svg.classList.remove("zoneOn")
+    /*
+    this.svgService.load()
+      .subscribe(map => {
+        this.roll = map.roll
+        this.shapes = map.shapes
       })
-    }
+    
+    this.svgService.overedChange.subscribe(id => {
+      this.selectedId = id
+    })
+    this.svgService.selectedChange.subscribe(id => {
+      for (const b of this.config.buildings) {
+        if (b.path == id) {
+          this.change.emit(b)
+          break
+        }
+      }
+    })
+    */
   }
 
   backgroundLoadingProgress: number = 0

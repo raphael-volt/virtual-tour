@@ -64,7 +64,62 @@ export class MainSvgService {
     return this.configService.touchEnable
   }
 
+  parseSvg(svg: SVGElement): SvgMap {
+    this.createIdMap(svg)
+    const m = this.svgElementsMap
+    const te = this.touchEnable
+    for(let id in m) {
+      this.handleShape(m[id].shape, te)
+      m[id].shape.classList.add("svge", "shape")
+      m[id].target.classList.add("svge", "roll")
+      //svge shape
+    }
+    return this.svgElementsMap
+  }
 
+  private handleShape(svg: SVGElement, touch: boolean) {
+    const t: string = touch ? "touchend" : "click"
+    svg.addEventListener(t, this.clickHandler)
+    if (!touch) {
+      svg.addEventListener("mouseover", this.overHandler)
+      svg.addEventListener("mouseout", this.outHandler)
+    }
+  }
+
+  private animateZoneTouch(svg: SVGElement) {
+    if (!svg.classList.contains("zoneOn")) {
+      svg.style.fillOpacity = ".1"
+      svg.style.stroke = "dodgerblue"
+      svg.style.strokeWidth = "3"
+      svg.classList.add("zoneOn")
+      svg.addEventListener(this.animationEvent, (event) => {
+        svg.classList.remove("zoneOn")
+        this.selectedChange.emit(getId(svg))
+      })
+    }
+  }
+
+  private clickHandler = (event: Event) => {
+    this.animateZoneTouch(event.currentTarget as SVGElement)
+  }
+
+  private overHandler = (event: Event) => {
+    let svg = event.currentTarget as SVGElement
+    const id: string = getId(svg)
+    svg.classList.add("on")
+    this.setOvered(true, id)
+    let target = this.svgElementsMap[id].target
+    target.classList.add('on')
+  }
+
+  private outHandler = (event: Event) => {
+    let svg = event.currentTarget as SVGElement
+    const id: string = getId(svg)
+    svg.classList.remove("on")
+    this.setOvered(false, id)
+    let target = this.svgElementsMap[id].target
+    target.classList.remove('on')
+  }
 
   load(): Observable<SvgDataMap> {
     if (this.svgDataMap)
@@ -92,6 +147,7 @@ export class MainSvgService {
     })
   }
 
+  private svgElementsMap: SvgMap
   createIdMap(element: Element) {
     let map = findById(element, ["roll", "shapes"])
     const sd: SvgDataMap = {
@@ -125,6 +181,7 @@ export class MainSvgService {
           targetId: c.id
         })
       }
+      this.svgElementsMap = m
     }
     this.svgDataMap = sd
     return sd
@@ -146,10 +203,11 @@ export class MainSvgService {
     this._animationEvent = getEventType({
       'WebkitAnimation': 'webkitAnimationEnd',
       'MozAnimation': 'animationend',
-      'OAnimation': 'oAnimationEnd oanimationend',
+      'OAnimation': 'animationend',//'oAnimationEnd oanimationend',
       'msAnimation': 'MSAnimationEnd',
       'animation': 'animationend'
-    })
+    })//animationend 
+    console.log("animationend", this._animationEvent)
     return this._animationEvent
   }
 
@@ -169,7 +227,7 @@ type IEventMap = { [name: string]: string }
 const getEventType = <T extends IEventMap, K extends keyof T>(data: T): T[K] => {
   const el = document.createElement('fakeelement')
   let k: string
-  for(k in data) {
+  for (k in data) {
     if (el.style[k] !== undefined) {
       return data[k]
     }

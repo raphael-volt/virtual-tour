@@ -28,19 +28,6 @@ svg {
 .main-selector-container>img {
   opacity: 0;
 }
-
-.main-selector-container>img {
-  -webkit-animation: $fadD;
-  /* Sa1fari, Chrome and Opera > 12.1 */
-  -moz-animation: $fadD;
-  /* Firefox < 16 */
-  -ms-animation: $fadD;
-  /* Internet Explorer */
-  -o-animation: $fadD;
-  /* Opera < 12.1 */
-  animation: $fadD;
-}
-
 .zoneOn {
   -webkit-animation: $zonTouchParams;
   /* Sa1fari, Chrome and Opera > 12.1 */
@@ -53,10 +40,19 @@ svg {
   animation: $zonTouchParams;
 }
 
+/*
+.main-selector-container>img {
+  -webkit-animation: $fadD;
+  -moz-animation: $fadD;
+  -ms-animation: $fadD;
+  -o-animation: $fadD;
+  animation: $fadD;
+}
+
 .main-selector-container>img.loaded {
   opacity: 1;
 }
-
+*/
 .svge {
   fill: #FFFFFF;
   stroke: none;

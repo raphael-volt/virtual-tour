@@ -2,6 +2,6 @@
   <div [class]="slideClass">
     <div #bg class="bg"></div>
     <img [imgOnLoad]="url" (loadChanged)="imgLoad($event)" (click)="closeHandler()" />
-    <img *ngIf="logoUrl" class="logos" [src]="logoUrl" />
+    <!-- <img *ngIf="logoUrl" class="logos" [src]="logoUrl" /> -->
   </div>
 </div>

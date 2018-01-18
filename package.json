@@ -1,6 +1,6 @@
 {
-  "name": "les-ballons",
-  "version": "0.0.0",
+  "name": "virtual-tour",
+  "version": "1.0.0",
   "license": "MIT",
   "scripts": {
     "ng": "ng",

@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "project": {
-    "name": "les-ballons"
+    "name": "virtual-tour"
   },
   "apps": [
     {
@@ -23,7 +23,8 @@
         "styles.css"
       ],
       "scripts": [
-        
+        "../node_modules/classlist.js/classList.js",
+        "../node_modules/web-animations-js/web-animations-next.min.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {
