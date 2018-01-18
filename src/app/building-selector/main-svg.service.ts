@@ -1,49 +1,100 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Observable, Observer } from "rxjs";
 import { ConfigService } from "../shared/config.service";
+import { element } from 'protractor';
 
 export type IzoneEvent = string | { id?: string, d: string, targetId?: string }
 
 type SvgMapItem = { shape: SVGElement, target: SVGElement }
 type SvgMap = { [ids: string]: SvgMapItem }
 const ON: string = "on"
+const CLASS: string = "class"
+const SPACE: string = " "
+
+const classList = (svg: Element) => {
+  let v = svg.getAttribute(CLASS)
+  if (!v || !v.length)
+    return []
+  const re = /\s+/;
+  v = v.replace(re, SPACE)
+  v = v.trim()
+  if (!v.length)
+    return []
+  return v.split(SPACE)
+}
+
+const setClass = (svg: Element, value: string | string[]) => {
+  if (typeof value != "string") {
+    value = value.join(SPACE)
+  }
+  console.log('[SET CLASS]', value)
+  svg.setAttribute(CLASS, value)
+}
+
+const hasClass = (svg: Element, cls: string, list?) => {
+  if (!list)
+    list = classList(svg)
+  return list.indexOf(cls) > -1
+}
+
+const addClass = (svg: Element, ...args: string[]) => {
+  let l = classList(svg)
+  for (const cls of args) {
+    if (!hasClass(svg, cls, l)) {
+      l.push(cls)
+    }
+  }
+  setClass(svg, l)
+}
+
+const removeClass = (svg: Element, cls: string) => {
+  let l = classList(svg)
+  if (hasClass(svg, cls, l)) {
+    const i = l.indexOf(cls)
+    l.splice(l.indexOf(cls), 1)
+    setClass(svg, l)
+  }
+}
 
 const getId = (svg: Element): string => {
   return svg.getAttribute('id')
 }
-const mapCollection = (collection: HTMLCollection) => {
+const isNode = (elmt: Node) => {
+  return elmt.nodeType == Node.ELEMENT_NODE
+}
+const mapCollection = (target: Node) => {
   const l = []
-  const n: number = collection.length
-  for (let i = 0; i < n; i++) {
-    l.push(collection.item(i))
+  if(isNode(target)) {
+    const n = target.childNodes.length
+    for(var i=0; i<n; i++) {
+      const c = target.childNodes.item(i)
+      if(isNode(c))
+        l.push(c)
+    }
   }
   return l
 }
-const findById = (node: Element, ids: string[]): { [id: string]: HTMLElement } => {
+const findById = (node: Node, ids: string[]): { [id: string]: HTMLElement } => {
   const map = {}
   ids = ids.splice(0)
   let done: boolean = false
-  const _findRecurse = (e: Element) => {
+  let sps = []
+  const _findRecurse = (e: Node) => {
     if (done)
       return
-    const id: string = getId(e)
+    const id: string = getId(e as Element)
     const i: number = ids.indexOf(id)
     if (i > -1) {
       ids.splice(i, 1)
       map[id] = e
-      if (!ids.length) {
-        done = true
-        return
-      }
     }
-    const n = e.children.length
-    for (let i = 0; i < n; i++) {
-      _findRecurse(e.children.item(i))
-    }
+    const l = mapCollection(e)
+    for(const c of l)
+    _findRecurse(c)
   }
 
   _findRecurse(node)
-
+  console.log("DONE")
   return map
 }
 
@@ -65,15 +116,16 @@ export class MainSvgService {
   }
 
   parseSvg(svg: SVGElement): SvgMap {
+    console.log('[PARSE SVG]')
     this.createIdMap(svg)
     const m = this.svgElementsMap
     const te = this.touchEnable
-    for(let id in m) {
+    for (let id in m) {
       this.handleShape(m[id].shape, te)
-      m[id].shape.classList.add("svge", "shape")
-      m[id].target.classList.add("svge", "roll")
-      //svge shape
+      addClass(m[id].shape, "svge", "shape")
+      addClass(m[id].target, "svge", "roll")
     }
+    console.log('<PARSE SVG>')
     return this.svgElementsMap
   }
 
@@ -87,13 +139,14 @@ export class MainSvgService {
   }
 
   private animateZoneTouch(svg: SVGElement) {
-    if (!svg.classList.contains("zoneOn")) {
+
+    if (!hasClass(svg, "zoneOn")) {
       svg.style.fillOpacity = ".1"
       svg.style.stroke = "dodgerblue"
       svg.style.strokeWidth = "3"
-      svg.classList.add("zoneOn")
+      addClass(svg, "zoneOn")
       svg.addEventListener(this.animationEvent, (event) => {
-        svg.classList.remove("zoneOn")
+        removeClass(svg, "zoneOn")
         this.selectedChange.emit(getId(svg))
       })
     }
@@ -106,19 +159,19 @@ export class MainSvgService {
   private overHandler = (event: Event) => {
     let svg = event.currentTarget as SVGElement
     const id: string = getId(svg)
-    svg.classList.add("on")
+    addClass(svg, "on")
     this.setOvered(true, id)
     let target = this.svgElementsMap[id].target
-    target.classList.add('on')
+    addClass(target, 'on')
   }
 
   private outHandler = (event: Event) => {
     let svg = event.currentTarget as SVGElement
     const id: string = getId(svg)
-    svg.classList.remove("on")
+    removeClass(svg, "on")
     this.setOvered(false, id)
     let target = this.svgElementsMap[id].target
-    target.classList.remove('on')
+    removeClass(target, 'on')
   }
 
   load(): Observable<SvgDataMap> {
@@ -158,8 +211,8 @@ export class MainSvgService {
     if (map.roll && map.shapes) {
 
       let svg: SVGElement
-      let shapes: SVGElement[] = mapCollection(map.shapes.children)
-      let rolls: SVGElement[] = mapCollection(map.roll.children)
+      let shapes: SVGElement[] = mapCollection(map.shapes)
+      let rolls: SVGElement[] = mapCollection(map.roll)
       let i = 0
       const nS = shapes.length
       const nR = rolls.length
@@ -171,7 +224,7 @@ export class MainSvgService {
           target: (i < nR ? rolls[i] : null)
         }
         m[c.getAttribute('id')] = mi
-        c.classList.add('shape')
+        addClass(c, 'shape')
         sd.shapes.push({ id: c.getAttribute('id'), d: c.getAttribute('d') })
         if (!mi.target) {
           continue

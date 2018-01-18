@@ -1,69 +1,31 @@
 <div class="main-selector-container" appResize>
-  <!--[class.noevents]="disabled"-->
-  <img #background (load)="backgroundLoad($event)" (progress)="backgroundProgress($event)" width="100%"
-    height="100%" />
+  <img #background (load)="backgroundLoad($event)" (progress)="backgroundProgress($event)" width="100%" height="100%" />
   <svg #svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-    width="100%" height="100%" viewBox="0 0 1920 1080" enable-background="new 0 0 1920 1080" xml:space="preserve" preserveAspectRatio="none">
+    width="100%" height="100%" viewBox="0 0 1920 1080" enable-background="new 0 0 1920 1080" preserveAspectRatio="none">
     <g id="roll">
-      <path d="M325,438l1,3l7,1l-12,13l-0.258,10.41l8.362,18.687L322,481l-8,3l28,51l23,5l26,7l27.304,7.176l6.504,7.01L418,547l40,3
+      <path class="svge" fill="none" fill="red" d="M325,438l1,3l7,1l-12,13l-0.258,10.41l8.362,18.687L322,481l-8,3l28,51l23,5l26,7l27.304,7.176l6.504,7.01L418,547l40,3
      l2,6l55,3v-8h3l39-70l16,1l13-24l-15-1l58-92l-8-25l-9-30l-23-1l7-8l-1-4l-127-5L325,438z M1920,1080H0V0h1920V1080z" />
-      <path d="M779,435v9h4l25-59l-4-26l-4-39h-7v-14l-26-1l-5,12h-5v-7h-5l-12,24h-11l-3-19h-6l-1-12l-27-1l-6,11h-2l-1-7h-6l-4,7
+      <path class="svge" fill="none" d="M779,435v9h4l25-59l-4-26l-4-39h-7v-14l-26-1l-5,12h-5v-7h-5l-12,24h-11l-3-19h-6l-1-12l-27-1l-6,11h-2l-1-7h-6l-4,7
      l-37,54l5,20l-8,11l1,5l-9,13l4,16l5-5L779,435z M1920,1080H0V0h1920V1080z" />
-      <path d="M966,590h2l8-78l17,1l9-111l-13,0l2-23v-20l1-25h-10v-11l-134-6l-2.948,10.489h-3.717L791,474l-2,1l-7,24l3,16l-6,23l3,9h2
+      <path class="svge" fill="none" d="M966,590h2l8-78l17,1l9-111l-13,0l2-23v-20l1-25h-10v-11l-134-6l-2.948,10.489h-3.717L791,474l-2,1l-7,24l3,16l-6,23l3,9h2
      l-0.271,3.57v2.334l-0.929,4.674L786,562v3l4,8l44,2l133,7L966,590z M1920,1080H0V0h1920V1080z" />
-      <path d="M1188,675l42,26l51,25l12-17l21.598,12.396L1306,738h3l20-30l4-11l25-32l-2,9l6-6l13,8l29-39l-14-8l6-8l5-5l13,7l22-28
+      <path class="svge" fill="none" d="M1188,675l42,26l51,25l12-17l21.598,12.396L1306,738h3l20-30l4-11l25-32l-2,9l6-6l13,8l29-39l-14-8l6-8l5-5l13,7l22-28
      l-17.75-9l12.75-17l-3,9l6-5l10-22l20-25l-5,10l3-1l17-35l-2-1l7-10l-15-7l9-11v-5l-162-68l-175,159v2l12,7l-4,17h-7l-2,4v4l-5,5
      l-5,42l56,35L1188,675z M1920,1080H0V0h1920V1080z" />
     </g>
     <g id="shapes">
-      <path id="a" d="M325,438l1,3l7,1l-12,13l-0.258,10.41l8.362,18.687L322,481l-8,3l28,51l23,5l26,7l27.304,7.176l6.504,7.01
+      <path class="svge" id="a" d="M325,438l1,3l7,1l-12,13l-0.258,10.41l8.362,18.687L322,481l-8,3l28,51l23,5l26,7l27.304,7.176l6.504,7.01
      L418,547l40,3l2,6l55,3v-8h3l39-70l16,1l13-24l-15-1l58-92l-8-25l-9-30l-23-1l7-8l-1-4l-127-5L325,438z" />
-      <path id="a-bis" d="M779,435v9h4l25-59l-4-26l-4-39h-7v-14l-26-1l-5,12h-5v-7h-5l-12,24h-11l-3-19h-6l-1-12l-27-1l-6,11h-2l-1-7
+      <path fill="none" id="a-bis" d="M779,435v9h4l25-59l-4-26l-4-39h-7v-14l-26-1l-5,12h-5v-7h-5l-12,24h-11l-3-19h-6l-1-12l-27-1l-6,11h-2l-1-7
      h-6l-4,7l-37,54l5,20l-8,11l1,5l-9,13l4,16l5-5L779,435z" />
-      <path id="b" d="M966,590h2l8-78l17,1l9-111l-13,0l2-23v-20l1-25h-10v-11l-134-6l-2.948,10.489h-3.717L791,474l-2,1l-7,24l3,16
+      <path fill="none" id="b" d="M966,590h2l8-78l17,1l9-111l-13,0l2-23v-20l1-25h-10v-11l-134-6l-2.948,10.489h-3.717L791,474l-2,1l-7,24l3,16
      l-6,23l3,9h2l-0.271,3.57v2.334l-0.929,4.674L786,562v3l4,8l44,2l133,7L966,590z" />
-      <path id="c" d="M1188,675l42,26l51,25l12-17l21.598,12.396L1306,738h3l20-30l4-11l25-32l-2,9l6-6l13,8l29-39l-14-8l6-8l5-5l13,7
+      <path fill="none" id="c" d="M1188,675l42,26l51,25l12-17l21.598,12.396L1306,738h3l20-30l4-11l25-32l-2,9l6-6l13,8l29-39l-14-8l6-8l5-5l13,7
      l22-28l-17.75-9l12.75-17l-3,9l6-5l10-22l20-25l-5,10l3-1l17-35l-2-1l7-10l-15-7l9-11v-5l-162-68l-175,159v2l12,7l-4,17h-7l-2,4v4
      l-5,5l-5,42l56,35L1188,675z" />
     </g>
   </svg>
-  <!--
-      <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      width="100%" height="100%" viewBox="0 0 1920 1080" enable-background="new 0 0 1920 1080" xml:space="preserve" preserveAspectRatio="none">
-      <path *ngFor="let p of shapes" [zoneEvent]="p" class="svge shape"/>  
-      <path *ngFor="let p of roll; let i = index" [zoneEvent]="p" class="svge roll" 
-      [zoneEventOn]="p.targetId==selectedId" />  
-    </svg>
-  -->
-  <div #container class="svg-container"></div>
   <div *ngIf="bgState == 'loading'" class="progress-bar">
     <span>{{backgroundLoadingProgress}} %</span>
   </div>
 </div>
-<!--
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 1920 1080"
-    height="100%" id="Calque_1" preserveAspectRatio="none" version="1.1" viewBox="0 0 1920 1080" width="100%" x="0px" xmlns="http://www.w3.org/2000/svg"
-    y="0px">
-    <path class="svge shape" id="a" d="M325,438l1,3l7,1l-12,13l-0.258,10.41l8.362,18.687L322,481l-8,3l28,51l23,5l26,7l27.304,7.176l6.504,7.01
-    L418,547l40,3l2,6l55,3v-8h3l39-70l16,1l13-24l-15-1l58-92l-8-25l-9-30l-23-1l7-8l-1-4l-127-5L325,438z"/>
-    <path class="svge shape" id="a-bis" d="M779,435v9h4l25-59l-4-26l-4-39h-7v-14l-26-1l-5,12h-5v-7h-5l-12,24h-11l-3-19h-6l-1-12l-27-1l-6,11h-2l-1-7
-    h-6l-4,7l-37,54l5,20l-8,11l1,5l-9,13l4,16l5-5L779,435z"/>
-    <path class="svge shape" id="b" d="M966,590h2l8-78l17,1l9-111l-13,0l2-23v-20l1-25h-10v-11l-134-6l-2.948,10.489h-3.717L791,474l-2,1l-7,24l3,16
-    l-6,23l3,9h2l-0.271,3.57v2.334l-0.929,4.674L786,562v3l4,8l44,2l133,7L966,590z"/>
-    <path class="svge shape" id="c" d="M1188,675l42,26l51,25l12-17l21.598,12.396L1306,738h3l20-30l4-11l25-32l-2,9l6-6l13,8l29-39l-14-8l6-8l5-5l13,7   
-    l22-28l-17.75-9l12.75-17l-3,9l6-5l10-22l20-25l-5,10l3-1l17-35l-2-1l7-10l-15-7l9-11v-5l-162-68l-175,159v2l12,7l-4,17h-7l-2,4v4
-    l-5,5l-5,42l56,35L1188,675z"/>
-    <path class="svge roll" d="M325,438l1,3l7,1l-12,13l-0.258,10.41l8.362,18.687L322,481l-8,3l28,51l23,5l26,7l27.304,7.176l6.504,7.01L418,547l40,3
-    l2,6l55,3v-8h3l39-70l16,1l13-24l-15-1l58-92l-8-25l-9-30l-23-1l7-8l-1-4l-127-5L325,438z M1920,1080H0V0h1920V1080z"
-      ></path>
-    <path class="svge roll" d="M779,435v9h4l25-59l-4-26l-4-39h-7v-14l-26-1l-5,12h-5v-7h-5l-12,24h-11l-3-19h-6l-1-12l-27-1l-6,11h-2l-1-7h-6l-4,7
-    l-37,54l5,20l-8,11l1,5l-9,13l4,16l5-5L779,435z M1920,1080H0V0h1920V1080z"
-      ></path>
-    <path class="svge roll" d="M966,590h2l8-78l17,1l9-111l-13,0l2-23v-20l1-25h-10v-11l-134-6l-2.948,10.489h-3.717L791,474l-2,1l-7,24l3,16l-6,23l3,9h2
-    l-0.271,3.57v2.334l-0.929,4.674L786,562v3l4,8l44,2l133,7L966,590z M1920,1080H0V0h1920V1080z"
-      ></path>
-    <path class="svge roll" d="M1188,675l42,26l51,25l12-17l21.598,12.396L1306,738h3l20-30l4-11l25-32l-2,9l6-6l13,8l29-39l-14-8l6-8l5-5l13,7l22-28
-    l-17.75-9l12.75-17l-3,9l6-5l10-22l20-25l-5,10l3-1l17-35l-2-1l7-10l-15-7l9-11v-5l-162-68l-175,159v2l12,7l-4,17h-7l-2,4v4l-5,5
-    l-5,42l56,35L1188,675z M1920,1080H0V0h1920V1080z"/>
-  </svg>
--->

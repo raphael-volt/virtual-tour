@@ -60,7 +60,8 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
 
   backgroundLoad(event: Event) {
     this.bgState = "loaded"
-    this.bg.classList.add("loaded")
+    if(this.bg)
+      this.bg.classList.add("loaded")
     this.enabled = true
     this.ngOnChanges({
       enabled: { currentValue: true, firstChange: true, previousValue: false, isFirstChange: () => true }
@@ -82,6 +83,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
     if (l && this.bg) {
       const url: string = join(l.name, this.config.image)
       if (this.bgUrl != url) {
+        this.bgUrl = url
         this.bgState = "loading"
         this.bg.classList.remove("loaded")
         let enabled = this.enabled
@@ -110,10 +112,18 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   ngAfterViewInit() {
     
     this.bg = this.bgRef.nativeElement
-    this.ctn = this.ctnRef.nativeElement
     this.svg = this.svgRef.nativeElement
     this.updateBgUrl()
     let map = this.svgService.parseSvg(this.svg)
+    this.svgService.selectedChange.subscribe(id => {
+      for (const b of this.config.buildings) {
+        if (b.path == id) {
+          this.change.emit(b)
+          break
+        }
+      }
+    })
+    /*
     
     this.svgService.overedChange.subscribe(id => {
       this.selectedId = id
@@ -126,6 +136,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
         }
       }
     })
+    */
     /*
     this.svgService.load()
       .subscribe(map => {
