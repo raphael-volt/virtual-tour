@@ -1,14 +1,40 @@
+div.nav-bar {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-direction: normal;
+    -moz-box-direction: normal;
+    -webkit-box-orient: horizontal;
+    -moz-box-orient: horizontal;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -webkit-box-pack: justify;
+    -moz-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-align-content: stretch;
+    -ms-flex-line-pack: stretch;
+    align-content: stretch;
+    -webkit-box-align: start;
+    -moz-box-align: start;
+    -webkit-align-items: flex-start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+}
+
 .app-container {
     position: absolute;
 }
 
-i.vti.vti-home {
-    position: absolute;
-    transition-duration: 300ms;
-    transition-property: transform;
-    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
-}
 
+/*
 @media screen and (min-width: 1280px) {
     i.vti.vti-home {
         top: 20px;
@@ -50,14 +76,42 @@ i.vti.vti-home {
         transform: translateY(calc(100% + 15px));
     }
 }
-
-i.vti.vti-home.on {
-    transform: translateX(0%);
+*/
+i.vti.vti-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    transform: translateX(-100px);
     transition-duration: 300ms;
     transition-property: transform;
     transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
 }
 
+i.vti.vti-home.on {
+    transform: translateX(0px);
+    transition-duration: 300ms;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
+}
+
+div.nav-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    transition-duration: 300ms;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
+    transform: translateY(80px);
+}
+
+div.nav-bar.on {
+    transform: translateY(0px);
+    transition-duration: 300ms;
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
+    pointer-events: all;
+}
 h1 {
     margin: 10px 0;
     padding: 0;
@@ -76,48 +130,6 @@ div.layout {
     top: 0;
 }
 
-div.nav-bar.on {
-    transform: translateY(0%);
-    transition-duration: 300ms;
-    transition-property: transform;
-    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
-    pointer-events: all;
-}
-
-div.nav-bar {
-    display: -webkit-box;
-    display: -moz-box;
-    display: -ms-flexbox;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-direction: normal;
-    -moz-box-direction: normal;
-    -webkit-box-orient: horizontal;
-    -moz-box-orient: horizontal;
-    -webkit-flex-direction: row;
-    -ms-flex-direction: row;
-    flex-direction: row;
-    -webkit-flex-wrap: nowrap;
-    -ms-flex-wrap: nowrap;
-    flex-wrap: nowrap;
-    -webkit-box-pack: justify;
-    -moz-box-pack: justify;
-    -webkit-justify-content: space-between;
-    -ms-flex-pack: justify;
-    justify-content: space-between;
-    -webkit-align-content: stretch;
-    -ms-flex-line-pack: stretch;
-    align-content: stretch;
-    -webkit-box-align: start;
-    -moz-box-align: start;
-    -webkit-align-items: flex-start;
-    -ms-flex-align: start;
-    align-items: flex-start;
-    position: absolute;
-    transition-duration: 300ms;
-    transition-property: transform;
-    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
-}
 
 div.nav-bar>i {
     -webkit-box-ordinal-group: 1;
