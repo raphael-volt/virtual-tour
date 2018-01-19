@@ -1,3 +1,13 @@
+.app-container {
+    position: absolute;
+}
+
+i.vti.vti-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
 div.nav-bar {
     display: -webkit-box;
     display: -moz-box;
@@ -28,24 +38,17 @@ div.nav-bar {
     -ms-flex-align: start;
     align-items: flex-start;
 }
-
-.app-container {
-    position: absolute;
-}
-
-
-/*
 @media screen and (min-width: 1280px) {
     i.vti.vti-home {
         top: 20px;
         left: 20px;
-        transform: translateX(calc(-100% - 25px));
+        transform: translateX(-100px);
     }
     div.nav-bar {
         bottom: 20px;
         left: 20px;
         right: 20px;
-        transform: translateY(calc(100% + 25px));
+        transform: translateY(80px);
     }
 }
 
@@ -53,56 +56,42 @@ div.nav-bar {
     i.vti.vti-home {
         top: 16px;
         left: 16px;
-        transform: translateX(calc(-100% - 21px));
+        transform: translateX(-66px);
     }
     div.nav-bar {
         bottom: 16px;
         left: 16px;
         right: 16px;
-        transform: translateY(calc(100% + 21px));
+        transform: translateY(60px);
     }
 }
 
 @media screen and (min-width: 200px) and (max-width: 640px) {
     i.vti.vti-home {
-        top: 10px;
-        left: 10px;
-        transform: translateX(calc(-100% - 15px));
+        top: 6px;
+        left: 6px;
+        transform: translateX(calc(-40px));
     }
     div.nav-bar {
-        bottom: 10px;
-        left: 10px;
-        right: 10px;
-        transform: translateY(calc(100% + 15px));
+        bottom: 6px;
+        left: 6px;
+        right: 6px;
+        transform: translateY(30px);
     }
 }
-*/
-i.vti.vti-home {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    transform: translateX(-100px);
+i.vti.vti-home, div.nav-bar {
     transition-duration: 300ms;
     transition-property: transform;
     transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
 }
-
 i.vti.vti-home.on {
     transform: translateX(0px);
     transition-duration: 300ms;
     transition-property: transform;
     transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
 }
-
 div.nav-bar {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    transition-duration: 300ms;
-    transition-property: transform;
-    transition-timing-function: cubic-bezier(0.080, 0.860, 0.540, 0.935);
-    transform: translateY(80px);
 }
 
 div.nav-bar.on {

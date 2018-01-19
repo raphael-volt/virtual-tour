@@ -11,15 +11,15 @@ export class ImgOnLoadDirective implements OnChanges {
 
   @HostListener('load')
   imgLoadHandler() {
-    this.appService.loading = false
     if(this._loadFlag) {
+      this.appService.loading = false
       this._loadFlag = false
       this.loadChanged.emit(this.img)
     }
   }
   @HostListener('progress', ["$event"])
   imgProgressHandler(event: ProgressEvent) {
-    this.appService.loadingProgress = event.total / event.loaded
+    this.appService.loadingProgress = event.loaded / event.total
   }
   @Input()
   imgOnLoad: string
@@ -41,7 +41,6 @@ export class ImgOnLoadDirective implements OnChanges {
           }
           window.requestAnimationFrame(tick)
         }
-        this.appService.loading = true
         this.img.setAttribute("src", url)
         window.requestAnimationFrame(tick)
       }

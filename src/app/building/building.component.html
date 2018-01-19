@@ -2,7 +2,7 @@
     <video [videoLoader]="videoUrl" (change)="videoChange($event)" muted>
         <source *ngFor="let vs of videoSources" [attr.type]="vs.type" [attr.src]="vs.src">
     </video>
-    <img #bgImg [class.on]="hasBackgroung" (load)="backgroundLoaded()"/>
+    <img #bgImg [class.on]="hasBackgroung"/>
     <i [class.on]="hasAppartement" 
     class="vti vti-info" 
     *ngFor="let a of appartements" 

@@ -112,12 +112,18 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   ngAfterViewInit() {
     
     this.bg = this.bgRef.nativeElement
+    this.bg.addEventListener('load', () => {
+      this.appService.loading = false
+      console.log('BuildingSelector bg COMPLETE')
+    })
     this.svg = this.svgRef.nativeElement
     this.updateBgUrl()
     let map = this.svgService.parseSvg(this.svg)
     this.svgService.selectedChange.subscribe(id => {
+      console.log('BUIMDING change')
       for (const b of this.config.buildings) {
         if (b.path == id) {
+          console.log('BUIMDING change notify')
           this.change.emit(b)
           break
         }

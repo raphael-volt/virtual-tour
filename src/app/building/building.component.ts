@@ -167,11 +167,18 @@ export class BuildingComponent extends ConfigComponent implements OnDestroy, Aft
   }
   ngAfterViewInit() {
     this.bgImg = this.bgImgRef.nativeElement
-    /*
-    this.bgImg.addEventListener("load", () => {
+    if(this.bgImg.complete) {
       this.bgLoaded = true
       this.checkBackgroundVisibility()
-    })
+    }
+    else {
+      this.bgImg.addEventListener("load", () => {
+        this.bgLoaded = true
+        this.checkBackgroundVisibility()
+      })
+
+    }
+    /*
     */
   }
 

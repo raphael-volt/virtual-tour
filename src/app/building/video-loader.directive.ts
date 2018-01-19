@@ -58,13 +58,16 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
   }
 
   private progressTimer
+  private playing
 
   private set src(v: string) {
     this._src = v;
+    this.playing = false
     this.canplaythroughFlag = false
     this.appService.loading = true
     this.notify("start")
     this.video.load()
+    this.appService.loadingProgress = 0
   }
 
   private enededHandler = () => {
@@ -72,18 +75,22 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
   }
 
   private playingHandler = (event: Event) => {
-    this.appService.loadingProgress = 0
-    this.appService.loading = false
+    // this.appService.loadingProgress = 0
     this.notify("begin")
   }
-
+  
   private canplaythroughFlag: boolean = false
   private canplaythroughHandler = (event?: MediaStreamEvent) => {
+    this.appService.loading = false
+    this.playing = true
+    this.canplaythroughFlag = true
     this.video.play()
     return false
   }
 
   private get loaded(): number {
+    if(this.playing)
+      return 1
     const video = this.video
     const t: number = this.duration
     if (!video.buffered || !video.buffered.length || isNaN(t)) {
@@ -105,7 +112,7 @@ export class VideoLoaderDirective implements OnChanges, OnDestroy {
   }
 
   private progressHandler = (event?: Event) => {
-    if (this.canplaythroughFlag)
+    if (this.canplaythroughFlag || this.playing)
       return false
     let e = this.notify("progress", this.loaded, this.duration)
     this.appService.loadingProgress = e.ratio

@@ -3,7 +3,7 @@ import { Router, NavigationEnd, NavigationStart } from "@angular/router";
 
 @Injectable()
 export class AppService {
-  
+
   hasNavBarChange: EventEmitter<boolean> = new EventEmitter<boolean>()
   hasHomeChange: EventEmitter<boolean> = new EventEmitter<boolean>()
   loadingProgressChange: EventEmitter<number> = new EventEmitter<number>()
@@ -40,32 +40,33 @@ export class AppService {
     }
   }
 
-  
 
-  private _loadingProgress : number=0;
-  public get loadingProgress() : number {
+
+  private _loadingProgress: number = 0;
+  public get loadingProgress(): number {
     return this._loadingProgress;
   }
-  public set loadingProgress(v : number) {
-    if(! this._loading)
+  public set loadingProgress(v: number) {
+    if (isNaN(v))
+      v = 0
+    if (!this._loading)
       this.loading = true
     this._loadingProgress = v;
     this.loadingProgressChange.emit(v)
   }
 
 
-  private _loading : boolean=false;
-  public get loading() : boolean {
+  private _loading: boolean = false;
+  public get loading(): boolean {
     return this._loading;
   }
-  public set loading(v : boolean) {
-    if((v !== true && v !== false) || v == this._loading)
+  public set loading(v: boolean) {
+    if ((v !== true && v !== false) || v == this._loading)
       return
-    //console.log("LOADING", v)
     this._loading = v;
     this.loadingChange.emit(v)
   }
 
-  showTurnAroundAnimation: boolean = true  
-  
+  showTurnAroundAnimation: boolean = true
+
 }

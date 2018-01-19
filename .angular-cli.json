@@ -23,9 +23,7 @@
         "styles.css"
       ],
       "scripts": [
-        "../node_modules/web-animations-js/web-animations.min.js", 
-        "../node_modules/classlist.js/classList.js", 
-        "../node_modules/web-animations-js/web-animations-next.min.js"
+        
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {

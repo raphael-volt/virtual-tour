@@ -27,7 +27,6 @@ const setClass = (svg: Element, value: string | string[]) => {
   if (typeof value != "string") {
     value = value.join(SPACE)
   }
-  console.log('[SET CLASS]', value)
   svg.setAttribute(CLASS, value)
 }
 
@@ -64,11 +63,11 @@ const isNode = (elmt: Node) => {
 }
 const mapCollection = (target: Node) => {
   const l = []
-  if(isNode(target)) {
+  if (isNode(target)) {
     const n = target.childNodes.length
-    for(var i=0; i<n; i++) {
+    for (var i = 0; i < n; i++) {
       const c = target.childNodes.item(i)
-      if(isNode(c))
+      if (isNode(c))
         l.push(c)
     }
   }
@@ -89,8 +88,8 @@ const findById = (node: Node, ids: string[]): { [id: string]: HTMLElement } => {
       map[id] = e
     }
     const l = mapCollection(e)
-    for(const c of l)
-    _findRecurse(c)
+    for (const c of l)
+      _findRecurse(c)
   }
 
   _findRecurse(node)
@@ -116,7 +115,6 @@ export class MainSvgService {
   }
 
   parseSvg(svg: SVGElement): SvgMap {
-    console.log('[PARSE SVG]')
     this.createIdMap(svg)
     const m = this.svgElementsMap
     const te = this.touchEnable
@@ -125,7 +123,6 @@ export class MainSvgService {
       addClass(m[id].shape, "svge", "shape")
       addClass(m[id].target, "svge", "roll")
     }
-    console.log('<PARSE SVG>')
     return this.svgElementsMap
   }
 
@@ -257,7 +254,7 @@ export class MainSvgService {
       'WebkitAnimation': 'webkitAnimationEnd',
       'MozAnimation': 'animationend',
       'OAnimation': 'animationend',//'oAnimationEnd oanimationend',
-      'msAnimation': 'MSAnimationEnd',
+      'msAnimation': 'animationend',
       'animation': 'animationend'
     })//animationend 
     console.log("animationend", this._animationEvent)
