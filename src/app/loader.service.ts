@@ -64,7 +64,7 @@ export class LoaderService {
       img.src = event.url
     })
   }
-  
+
   private loadCachedVideo(event: LoaderEvent) {
     return Observable.create((observer: Observer<LoaderEvent>) => {
       const video: HTMLVideoElement = event.target as HTMLVideoElement
@@ -99,7 +99,7 @@ export class LoaderService {
     const t: number = mapItem.event.total
     mapItem.event.loaded = this.getVideoLoaded(video, t)
     mapItem.observer.next(mapItem.event)
-    if(mapItem.event.total && mapItem.event.total == mapItem.event.loaded) {
+    if (mapItem.event.total && mapItem.event.total == mapItem.event.loaded) {
       this.cache.push(mapItem.event.url)
       mapItem.event.loaded = mapItem.event.total
       mapItem.event.target.play()
@@ -153,7 +153,7 @@ export class LoaderService {
   private loading: boolean = false
 
   private nextLoad() {
-    if(this.loadingVideo)
+    if (this.loadingVideo)
       return
     let i: any
     let d: ImgLoaderData
@@ -161,12 +161,6 @@ export class LoaderService {
     if (!this.queue.length) {
       for (i in loaders) {
         d = loaders[i]
-        if (d && d[i] && d[i][0]) {
-          const xhr: XMLHttpRequest = d[i][0]
-          xhr.removeEventListener("loadend", this.imgLoaded)
-          xhr.removeEventListener("progress", this.imgProgress)
-          xhr.removeEventListener("error", this.imgError)
-        }
         loaders[i] = null
       }
       this.map = {}
@@ -197,8 +191,23 @@ export class LoaderService {
             d[1] = this.map[event.url]
             this.queue.splice(j, 1)
             d[1].observer.next(event)
-            d[0].open("get", event.url)
-            d[0].send(null)
+            const loader: XHRImage = new XHRImage(d[0])
+            const sub = loader.loadEvent(event)
+              .subscribe(
+              e => {
+                d[1].observer.next(e)
+              },
+              err => {
+                delete (this.map[event.url])
+                d[1].observer.error(event)
+                this.calculateProgress()
+              },
+              () => {
+                this.cache.push(event.url)
+                d[2] = false
+                this.nextLoad()
+                nextAndComplet(d[1].observer, event)
+              })
             break
           }
         }
@@ -237,54 +246,14 @@ export class LoaderService {
       this.updateVideoProgress(i)
       this.calculateProgress()
     }
-    if(this.loadingVideo)
+    if (this.loadingVideo)
       window.requestAnimationFrame(this.videoProgressLoop)
   }
 
   private createImgLoaderData(): ImgLoaderData {
     const xhr: XMLHttpRequest = new XMLHttpRequest()
-    xhr.addEventListener("progress", this.imgProgress)
-    xhr.addEventListener("loadend", this.imgLoaded)
-    xhr.addEventListener("error", this.imgError)
     xhr.responseType = "blob"
     return [xhr, null, false]
-  }
-
-  private imgProgress = (event: ProgressEvent) => {
-    const d = this.getImgMapItemFromEvent(event)
-    d.event.loaded = event.loaded
-    d.event.total = event.total
-    this.calculateProgress()
-    d.observer.next(d.event)
-  }
-
-  private imgError = (event: ErrorEvent) => {
-    const d = this.getImgMapItemFromEvent(event)
-    delete (this.map[d.event.url])
-    d.observer.error(event)
-    this.calculateProgress()
-  }
-
-  private imgLoaded = (event) => {
-    const d = this.getLoaderDataFromEvent(event)
-    const i = d[1]
-    const img: HTMLImageElement = i.event.target
-    const fr: FileReader = new FileReader()
-    const imgDone = ( ) => { 
-      img.removeEventListener('load', imgDone)
-      this.cache.push(i.event.url)
-      i.event.loaded = i.event.total
-      d[2] = false
-      this.nextLoad()
-      nextAndComplet(i.observer, i.event)
-    }
-    const dataDone = ( ) => {
-      fr.removeEventListener('load', dataDone)
-      img.src = fr.result
-    }
-    img.addEventListener('load', imgDone)
-    fr.addEventListener('load', dataDone)
-    fr.readAsDataURL(d[0].response)
   }
 
   private videoProgress = (event: MediaStreamEvent) => {
@@ -362,5 +331,70 @@ export class LoaderService {
       }
     }
     return null
+  }
+}
+
+export class XHRImage {
+
+  constructor(public xhr?: XMLHttpRequest) {
+
+  }
+  loadEvent(loaderEvent: LoaderEvent): Observable<LoaderEvent> {
+    return Observable.create((o: Observer<LoaderEvent>) => {
+      const img: HTMLImageElement = loaderEvent.target
+      let xhr: XMLHttpRequest = this.xhr
+      if (!xhr) {
+        xhr = new XMLHttpRequest()
+        xhr.responseType = 'blob'
+      }
+      const error = err => {
+        unhandle()
+        o.error(err)
+      }
+
+      const progress = (e: ProgressEvent) => {
+        if (isNaN(loaderEvent.total))
+          loaderEvent.total = e.total
+        loaderEvent.loaded = e.loaded
+        o.next(loaderEvent)
+      }
+
+      const loadend = e => {
+        unhandle()
+        const fr: FileReader = new FileReader()
+        const imgDone = () => {
+          img.removeEventListener('load', imgDone)
+          loaderEvent.loaded = loaderEvent.total
+          o.complete()
+        }
+        const dataDone = () => {
+          fr.removeEventListener('load', dataDone)
+          img.addEventListener('load', imgDone)
+          img.src = fr.result
+        }
+        fr.addEventListener('load', dataDone)
+        fr.readAsDataURL(xhr.response)
+      }
+
+      const unhandle = () => {
+        xhr.removeEventListener("progress", progress)
+        xhr.removeEventListener("loadend", loadend)
+        xhr.removeEventListener("error", error)
+      }
+
+      xhr.addEventListener("progress", progress)
+      xhr.addEventListener("loadend", loadend)
+      xhr.addEventListener("error", error)
+      xhr.open('get', loaderEvent.url)
+      xhr.send(null)
+    })
+  }
+  load(img: HTMLImageElement, url: string): Observable<LoaderEvent> {
+    return this.loadEvent({
+      loaded: 0,
+      total: NaN,
+      target: img,
+      url: url
+    })
   }
 }

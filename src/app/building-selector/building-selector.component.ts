@@ -41,7 +41,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
 
   @Input()
   active: boolean = false
-  
+
   constructor(
     private urlService: MediaUrlService,
     configService: ConfigService,
@@ -51,20 +51,18 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
     private svgService: MainSvgService) {
     super(configService, appService)
     urlService.definitionChange.subscribe(def => {
-      if (!this._initFlag)
-        return this.init()
       this.updateBgUrl()
     })
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    
+
   }
 
   setConfig(config: Config) {
     this.buildings = config.buildings
     this.resizeService.configLayoutChange.subscribe(this.updateBgUrl)
-    this.init()
+    this.updateBgUrl()
   }
 
 
@@ -98,19 +96,10 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   overedId: string
   selectedId: string = null
 
-  private _initFlag: boolean = false
-  private init() {
-    if (!this.config || !this.bg || this._initFlag || !this.urlService.definition)
-      return
-    this._initFlag = true
-    this.updateBgUrl()
-  }
   ngAfterViewInit() {
     this.bg = this.bgRef.nativeElement
     this.svg = this.svgRef.nativeElement
-    this.init()
 
-    let map = this.svgService.parseSvg(this.svg)
     this.svgService.selectedChange.subscribe(id => {
       for (const b of this.config.buildings) {
         if (b.path == id) {
@@ -119,5 +108,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
         }
       }
     })
+    this.svgService.parseSvg(this.svg)
+    this.updateBgUrl()
   }
 }

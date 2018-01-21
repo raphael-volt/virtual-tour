@@ -33,9 +33,6 @@ svg {
   bottom: 0;
 }
 
-.main-selector-container>img {
-  opacity: 0;
-}
 .zoneOn {
   -webkit-animation: $zonTouchParams;
   /* Sa1fari, Chrome and Opera > 12.1 */
@@ -49,6 +46,7 @@ svg {
 }
 
 .main-selector-container>img {
+  opacity: 0;
   -webkit-animation: $fadD;
   -moz-animation: $fadD;
   -ms-animation: $fadD;
