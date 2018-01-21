@@ -10,11 +10,19 @@ $svgOpacity: 0.4;
 $svgOpacityD: 300ms;
 $zonTouchParams: zoneTouch 400ms;
 $zoneTouchMiddle: 20%;
+
 .main-selector-container {
   position: relative;
   left: 0;
   right: 0;
   overflow: hidden;
+}
+
+.main-selector-container > .svge.shape {
+  pointer-events: none;
+}
+.main-selector-container.active > .svge.shape {
+  pointer-events: all;
 }
 
 svg {

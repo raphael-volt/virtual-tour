@@ -226,8 +226,8 @@ export class LoaderService {
     this.videoMapItem = this.map[event.url]
     const video: HTMLVideoElement = event.target
     // video.addEventListener('progress', this.videoProgress)
-    video.load()
     window.requestAnimationFrame(this.videoProgressLoop)
+    video.load()
 
   }
 
@@ -246,6 +246,7 @@ export class LoaderService {
     xhr.addEventListener("progress", this.imgProgress)
     xhr.addEventListener("loadend", this.imgLoaded)
     xhr.addEventListener("error", this.imgError)
+    xhr.responseType = "blob"
     return [xhr, null, false]
   }
 
@@ -268,16 +269,22 @@ export class LoaderService {
     const d = this.getLoaderDataFromEvent(event)
     const i = d[1]
     const img: HTMLImageElement = i.event.target
-    const done = () => {
+    const fr: FileReader = new FileReader()
+    const imgDone = ( ) => { 
+      img.removeEventListener('load', imgDone)
       this.cache.push(i.event.url)
-      img.removeEventListener('load', done)
       i.event.loaded = i.event.total
-      nextAndComplet(i.observer, i.event)
       d[2] = false
       this.nextLoad()
+      nextAndComplet(i.observer, i.event)
     }
-    img.addEventListener('load', done)
-    img.src = i.event.url
+    const dataDone = ( ) => {
+      fr.removeEventListener('load', dataDone)
+      img.src = fr.result
+    }
+    img.addEventListener('load', imgDone)
+    fr.addEventListener('load', dataDone)
+    fr.readAsDataURL(d[0].response)
   }
 
   private videoProgress = (event: MediaStreamEvent) => {

@@ -9,7 +9,7 @@ import { ResizeService } from "./shared/resize.service";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
-  title = 'Les Ballons';
+  
   constructor(
     private router: Router,
     private appService: AppService,

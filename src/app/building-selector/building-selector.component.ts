@@ -31,7 +31,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   @ViewChild("background")
   bgRef: ElementRef | undefined
   private bg: HTMLImageElement
-  private bgUrl: string = ""
+  private bgUrl: string
 
 
   @ViewChild("svg")
@@ -41,10 +41,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
 
   @Input()
   active: boolean = false
-  enabled = false
-  disabled = true
-
-
+  
   constructor(
     private urlService: MediaUrlService,
     configService: ConfigService,
@@ -61,12 +58,7 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.active || changes.enabled) {
-      if (this.active === true && this.enabled === true) {
-        this.disabled = false
-      }
-      else this.disabled = true
-    }
+    
   }
 
   setConfig(config: Config) {
@@ -76,20 +68,13 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   }
 
 
+  private loading: boolean = false
   private updateBgUrl = () => {
     if (!this.config || !this.bg || !this.urlService.definition) return
     const url: string = this.urlService.getAsset(this.config.image)
     if (this.bgUrl != url) {
       this.bgUrl = url
       removeClass(this.bg, "loaded")
-      let enabled = this.enabled
-      if (enabled) {
-        this.enabled = false
-        this.ngOnChanges({
-          enabled: { currentValue: false, firstChange: false, previousValue: true, isFirstChange: () => false }
-        })
-        this.loaded.emit(false)
-      }
       this.loader.loadImg(this.bg, url)
         .subscribe(event => {
           this.appService.loadingProgress = event.loaded / event.total
@@ -98,12 +83,8 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
         () => {
           this.appService.loading = false
           addClass(this.bg, "loaded")
-          this.enabled = true
-          this.ngOnChanges({
-            enabled: { currentValue: true, firstChange: true, previousValue: false, isFirstChange: () => true }
-          })
-          this.loaded.emit(true)
           this.appService.mainBackgroundLoaded = true
+          this.loaded.emit(true)
         })
     }
   }
