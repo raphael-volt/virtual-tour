@@ -432,11 +432,9 @@ const getBounds = (target): [number, number] => {
   const style = window.getComputedStyle(target)
   return [parseSize(style.width), parseSize(style.height)]
 }
-const RE = /^(\d+)(\w*)$/
+const RE = /([a-z]*)$/
 const parseSize = (val: string): number => {
-  if (RE.test(val)) {
-    val = RE.exec(val)[1]
-  }
+  val = val.replace(RE, '')
   return Number(val)
 }
 const getContext = (canvas: HTMLCanvasElement): CanvasRenderingContext2D => {
