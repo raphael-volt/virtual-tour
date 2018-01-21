@@ -51,10 +51,24 @@ export class AppService {
       v = 0
     if (!this._loading)
       this.loading = true
+    
     this._loadingProgress = v;
     this.loadingProgressChange.emit(v)
   }
 
+  readonly mainBackgroundLoadedChange: EventEmitter<boolean> = new EventEmitter<boolean>()
+
+  private _mainBackgroundLoaded: boolean
+  
+  get mainBackgroundLoaded(): boolean {
+    return this._mainBackgroundLoaded
+  }
+  set mainBackgroundLoaded(value: boolean) {
+    if(this._mainBackgroundLoaded == value)
+      return
+    this._mainBackgroundLoaded = value
+    this.mainBackgroundLoadedChange.emit(value)
+  }
 
   private _loading: boolean = false;
   public get loading(): boolean {

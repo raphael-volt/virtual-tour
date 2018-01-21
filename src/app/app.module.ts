@@ -19,6 +19,7 @@ import { Loader } from "./shared/loader";
 import { ImgLoaderService } from "./turn-around/img-loader.service";
 import { AppComponent } from './app.component';
 import { TurnaroundFramesService } from "./shared/turnaround-frames.service";
+import { LoaderService } from "./loader.service";
 // components & directives
 import { SizeBaseDirective } from './shared/size-base.directive';
 import { AppTitleDirective } from './app-title.directive';
@@ -44,7 +45,8 @@ import { ZoneEventDirective } from './building-selector/zone-event.directive';
 import { AppartementComponent } from './building/appartement/appartement.component';
 import { ImgOnLoadDirective } from './building/appartement/img-on-load.directive';
 import { TestAppartementComponent } from './test-appartement/test-appartement.component';
-
+import { MediaUrlService } from "./media-url.service";
+import { GlobalLoaderService } from "./global-loader.service";
 @NgModule({
   declarations: [
     AppComponent,
@@ -85,7 +87,10 @@ import { TestAppartementComponent } from './test-appartement/test-appartement.co
     Loader,
     ImgLoaderService,
     TurnaroundFramesService,
-    MainSvgService
+    MainSvgService,
+    MediaUrlService,
+    GlobalLoaderService,
+    LoaderService
   ],
   bootstrap: [AppComponent]
 })

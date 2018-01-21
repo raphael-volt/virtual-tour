@@ -13,10 +13,8 @@ const parseCSSSizePX = (val: string): number => {
 
 }        
 
-const px = (value: number, floor: boolean = true): string => {
-    if (floor)
-        value = Math.floor(value)
-    return value + PX
+const px = (value: number): string => {
+    return value.toFixed(3) + PX
 }
 
 const px2num = (value: string): number => {

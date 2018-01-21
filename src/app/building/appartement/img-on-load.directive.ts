@@ -1,5 +1,9 @@
-import { Directive, Input, Output, EventEmitter, OnChanges, SimpleChanges, ElementRef, HostListener } from '@angular/core';
+import {
+  Directive, Input, Output, EventEmitter,
+  OnChanges, SimpleChanges, ElementRef
+} from '@angular/core';
 import { AppService } from "../../app.service";
+import { LoaderEvent, LoaderService } from "../../loader.service";
 @Directive({
   selector: '[imgOnLoad]'
 })
@@ -9,40 +13,35 @@ export class ImgOnLoadDirective implements OnChanges {
   @Output()
   loadChanged: EventEmitter<HTMLImageElement> = new EventEmitter<HTMLImageElement>()
 
-  @HostListener('load')
-  imgLoadHandler() {
-    if(this._loadFlag) {
-      this.appService.loading = false
-      this._loadFlag = false
-      this.loadChanged.emit(this.img)
-    }
-  }
-  @HostListener('progress', ["$event"])
-  imgProgressHandler(event: ProgressEvent) {
-    this.appService.loadingProgress = event.loaded / event.total
-  }
   @Input()
   imgOnLoad: string
 
   private img: HTMLImageElement
-  constructor(ref: ElementRef, private appService: AppService) {
+  constructor(
+    ref: ElementRef,
+    private appService: AppService,
+    private loader: LoaderService) {
+
     this.img = ref.nativeElement
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if(changes.imgOnLoad) {
+    if (changes.imgOnLoad) {
       const url: string = changes.imgOnLoad.currentValue
-      if(typeof url == "string") {
+      if (typeof url == "string") {
         this._loadFlag = true
         const img = this.img
-        const tick = () => {
-          if(img.complete && this._loadFlag) {
-            return this.imgLoadHandler()
-          }
-          window.requestAnimationFrame(tick)
-        }
-        this.img.setAttribute("src", url)
-        window.requestAnimationFrame(tick)
+        this.loader.loadImg(this.img, url)
+          .subscribe(
+          (event: LoaderEvent) => {
+            this.appService.loadingProgress = event.loaded / event.total
+          },
+          err => { },
+          () => {
+            this.appService.loading = false
+            this._loadFlag = false
+            this.loadChanged.emit(img)
+          })
       }
     }
   }

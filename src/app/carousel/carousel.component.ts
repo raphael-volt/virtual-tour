@@ -13,7 +13,7 @@ import { ResizeService } from "../shared/resize.service";
 import { AppService } from "../app.service";
 import { ConfigService, join } from "../shared/config.service";
 import { Subscription, Config, ConfigLayout } from "../shared/model";
-
+import { LoaderService } from "../loader.service";
 const DEFAULT_NUMFRAME = 20
 
 @Component({
@@ -26,6 +26,7 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
   constructor(
     appService: AppService,
     configService: ConfigService,
+    private loader: LoaderService,
     private ressizeService: ResizeService
   ) {
     super(configService, appService)
@@ -75,10 +76,10 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
       sub.unsubscribe()
       this.beforeDraw()
       this.resizeSub = this.ressizeService.layoutChange.subscribe(this.resizeHandler)
-      
+
     })
     this.configLayoutSub = this.ressizeService.configLayoutChange.subscribe(this.configLayoutChangeHandler)
-    if(this.ressizeService.configLayout)
+    if (this.ressizeService.configLayout)
       this.configLayoutChangeHandler(this.ressizeService.configLayout)
     this.ressizeService.invalidateSize()
   }
@@ -172,44 +173,6 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
 
     this._canvas.width = layout.width
     this._canvas.height = layout.height
-
-    /*
-    const BW: number = 60
-    const wr: Rect = this.sizeService.windowRect
-    let absVal: number = 0
-    if (wr.width - layout.width >= BW * 2) {
-      absVal = -BW
-    }
-    this.prevBox.style.left = px(absVal)
-    this.nextBox.style.right = px(absVal)
-
-    let ws = this.windoSizes
-    let layout: Rect = new Rect()
-    layout.x = 55
-    layout.y = layout.x
-    layout.width = ws[0] - layout.x * 2
-    layout.height = ws[1] - layout.y * 2
-
-
-    this._canvas.style.left = layout.x + PX
-    this._canvas.style.top = layout.y + PX
-
-    // Aligned with main-controller
-
-    let ws = this.windoSizes
-    let bounds = this.flexRow.getRowBounds(1)
-    let layout: Rect = new Rect()
-    layout.x = 55
-    layout.y = bounds.top
-    layout.width = ws[0] - layout.x * 2
-    layout.height = bounds.height//ws[1] - layout.y
-
-    this._canvas.width = layout.width
-    this._canvas.height = layout.height
-    
-    this._canvas.style.left = layout.x + PX
-    this._canvas.style.top = layout.y + PX
-    */
   }
   ngAfterViewInit() {
     this.windoSizes = this.ressizeService.windowRect
@@ -419,18 +382,15 @@ export class CarouselComponent extends ConfigComponent implements OnInit, OnDest
   getImage(index: number): Observable<HTMLImageElement> {
     return Observable.create((o: Observer<HTMLImageElement>) => {
       this.images[index] = new Image()
-      let loaded = (e: Event) => {
-        this.images[index].removeEventListener("load", loaded)
-        this.images[index].removeEventListener("progress", progress)
-        o.next(this.images[index])
-        o.complete()
-      }
-      let progress = (event: ProgressEvent) => {
-        this.appService.loadingProgress = event.loaded / event.total
-      }
-      this.images[index].addEventListener("load", loaded)
-      this.images[index].addEventListener("progress", progress)
-      this.images[index].src = this.urls[index]
+      this.loader.loadImg(this.images[index], this.urls[index])
+        .subscribe(event => {
+          this.appService.loadingProgress = event.loaded / event.total
+        },
+        err => { }, () => {
+          this.appService.loading = false
+          o.next(this.images[index])
+          o.complete()
+        })
     })
   }
 

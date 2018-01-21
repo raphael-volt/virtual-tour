@@ -1,3 +1,4 @@
+export type DefinitionName = "md" | "sd" | "hd" | undefined
 
 export interface IAppartement {
     name: string
@@ -39,7 +40,7 @@ export interface IVideo {
 }
 
 export interface ConfigLayout {
-    name: string
+    name: DefinitionName
     layout: Layout
     video: IVideo
 }

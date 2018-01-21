@@ -42,7 +42,7 @@ div.nav-bar {
     i.vti.vti-home {
         top: 20px;
         left: 20px;
-        transform: translateX(-100px);
+        transform: translateX(-105px);
     }
     div.nav-bar {
         bottom: 20px;
@@ -56,7 +56,7 @@ div.nav-bar {
     i.vti.vti-home {
         top: 16px;
         left: 16px;
-        transform: translateX(-66px);
+        transform: translateX(-75px);
     }
     div.nav-bar {
         bottom: 16px;
@@ -70,7 +70,7 @@ div.nav-bar {
     i.vti.vti-home {
         top: 6px;
         left: 6px;
-        transform: translateX(calc(-40px));
+        transform: translateX(calc(-45px));
     }
     div.nav-bar {
         bottom: 6px;

@@ -1,12 +1,13 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { ConfigService } from "./config.service";
-import { Config, Layout, ConfigLayout } from "./model";
+import { Config, Layout, ConfigLayout, DefinitionName } from "./model";
 import { Rect } from "./math/rect";
 import { Bounds } from "./util/css.util";
 
 @Injectable()
 export class ResizeService {
 
+  definitionNameChange: EventEmitter<DefinitionName> = new EventEmitter<DefinitionName>()
   configLayoutChange: EventEmitter<ConfigLayout> = new EventEmitter<ConfigLayout>()
 
   private _configLayouts: ConfigLayout[]
@@ -76,9 +77,7 @@ export class ResizeService {
       this._configLayouts = configService.config.layouts
       this._windowRect = new Rect(0, 0, window.innerWidth, window.innerHeight)
       window.addEventListener("resize", this.resizeHandler)
-      if (this.invalidateSizeFlag) {
-        this.validateSize(this._windowRect.width, this._windowRect.height)
-      }
+      this.validateSize(this._windowRect.width, this._windowRect.height)
     }
     if (configService.hasConfig) {
       handle()
@@ -90,33 +89,14 @@ export class ResizeService {
         handle()
       })
     }
-    /*
-
-
-    let initRect = (layout: Layout) => {
-      this._configRect = new Rect(0, 0, layout.width, layout.height)
-      this._layoutRect = this._configRect.clone
-    }
-
-    if (configService.hasConfig) {
-      initRect(configService.config.layout)
-      handle()
-    }
-
-    else {
-      let sub = configService.getConfig().subscribe(config => {
-        initRect(config.layout)
-        sub.unsubscribe()
-        handle()
-      })
-    }
-    */
   }
 
   private resizeHandler = (event?: Event) => {
     this.validateSize(window.innerWidth, window.innerHeight)
   }
   private lastSizes: [number, number] = [0, 0]
+
+  definitionChange : EventEmitter<any> = new EventEmitter<any>()
 
   private findBestLayout(w: number): boolean {
     if (!this._configLayouts || w < 10)
@@ -137,9 +117,11 @@ export class ResizeService {
     if (this._configLayout == layoutConfig)
       return true
     this._configLayout = layoutConfig
+    this.definitionChange.emit(layoutConfig.name)
     this.configService.config.layout = layoutConfig.layout
     this._configRect = new Rect(0, 0, layoutConfig.layout.width, layoutConfig.layout.height)
     this.notifyConfigLayoutFlag = true
+
     return true
   }
   private notifyConfigLayoutFlag: boolean
@@ -147,9 +129,6 @@ export class ResizeService {
     if (!this.findBestLayout(ww))
       return
     this.invalidateSizeFlag = false
-    // if (this.lastSizes[0] == ww && this.lastSizes[1] == wh)
-    //   return
-
     this.lastSizes[0] = ww
     this.lastSizes[1] = wh
     const wr = this._windowRect

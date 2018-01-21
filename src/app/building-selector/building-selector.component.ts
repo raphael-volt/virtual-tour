@@ -9,6 +9,9 @@ import { ConfigService, join } from "../shared/config.service";
 import { ResizeService } from "../shared/resize.service";
 import { AppService } from "../app.service";
 import { MainSvgService } from "./main-svg.service";
+import { MediaUrlService } from "../media-url.service";
+import { addClass, removeClass, hasClass } from "../shared/util/dom.utils";
+import { LoaderEvent, LoaderService } from "../loader.service";
 @Component({
   selector: 'building-selector',
   templateUrl: './building-selector.component.html',
@@ -28,25 +31,33 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   @ViewChild("background")
   bgRef: ElementRef | undefined
   private bg: HTMLImageElement
-  bgUrl: string=""
+  private bgUrl: string = ""
 
-  
+
   @ViewChild("svg")
   svgRef: ElementRef | undefined
   private svg: SVGElement
-  
+
 
   @Input()
   active: boolean = false
   enabled = false
   disabled = true
 
+
   constructor(
+    private urlService: MediaUrlService,
     configService: ConfigService,
     appService: AppService,
+    private loader: LoaderService,
     private resizeService: ResizeService,
     private svgService: MainSvgService) {
     super(configService, appService)
+    urlService.definitionChange.subscribe(def => {
+      if (!this._initFlag)
+        return this.init()
+      this.updateBgUrl()
+    })
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -58,46 +69,43 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
     }
   }
 
-  backgroundLoad(event: Event) {
-    this.bgState = "loaded"
-    if(this.bg)
-      this.bg.classList.add("loaded")
-    this.enabled = true
-    this.ngOnChanges({
-      enabled: { currentValue: true, firstChange: true, previousValue: false, isFirstChange: () => true }
-    })
-    this.loaded.emit(true)
-  }
-
   setConfig(config: Config) {
     this.buildings = config.buildings
     this.resizeService.configLayoutChange.subscribe(this.updateBgUrl)
-    this.updateBgUrl()
+    this.init()
   }
 
 
-  private updateBgUrl = (l?: ConfigLayout) => {
-    
-    if (!l)
-      l = this.resizeService.configLayout
-    if (l && this.bg) {
-      const url: string = join(l.name, this.config.image)
-      if (this.bgUrl != url) {
-        this.bgUrl = url
-        this.bgState = "loading"
-        this.bg.classList.remove("loaded")
-        let enabled = this.enabled
-        if (enabled) {
-          this.enabled = false
-          this.ngOnChanges({
-            enabled: { currentValue: false, firstChange: false, previousValue: true, isFirstChange: () => false }
-          })
-          this.loaded.emit(false)
-        }
-        this.bg.setAttribute('src', url)
+  private updateBgUrl = () => {
+    if (!this.config || !this.bg || !this.urlService.definition) return
+    const url: string = this.urlService.getAsset(this.config.image)
+    if (this.bgUrl != url) {
+      this.bgUrl = url
+      removeClass(this.bg, "loaded")
+      let enabled = this.enabled
+      if (enabled) {
+        this.enabled = false
+        this.ngOnChanges({
+          enabled: { currentValue: false, firstChange: false, previousValue: true, isFirstChange: () => false }
+        })
+        this.loaded.emit(false)
       }
+      this.loader.loadImg(this.bg, url)
+        .subscribe(event => {
+          this.appService.loadingProgress = event.loaded / event.total
+        },
+        err => { },
+        () => {
+          this.appService.loading = false
+          addClass(this.bg, "loaded")
+          this.enabled = true
+          this.ngOnChanges({
+            enabled: { currentValue: true, firstChange: true, previousValue: false, isFirstChange: () => true }
+          })
+          this.loaded.emit(true)
+          this.appService.mainBackgroundLoaded = true
+        })
     }
-    
   }
 
   private buildings: Building[]
@@ -109,32 +117,20 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
   overedId: string
   selectedId: string = null
 
-  ngAfterViewInit() {
-    
-    this.bg = this.bgRef.nativeElement
-    this.bg.addEventListener('load', () => {
-      this.appService.loading = false
-      console.log('BuildingSelector bg COMPLETE')
-    })
-    this.svg = this.svgRef.nativeElement
+  private _initFlag: boolean = false
+  private init() {
+    if (!this.config || !this.bg || this._initFlag || !this.urlService.definition)
+      return
+    this._initFlag = true
     this.updateBgUrl()
+  }
+  ngAfterViewInit() {
+    this.bg = this.bgRef.nativeElement
+    this.svg = this.svgRef.nativeElement
+    this.init()
+
     let map = this.svgService.parseSvg(this.svg)
     this.svgService.selectedChange.subscribe(id => {
-      console.log('BUIMDING change')
-      for (const b of this.config.buildings) {
-        if (b.path == id) {
-          console.log('BUIMDING change notify')
-          this.change.emit(b)
-          break
-        }
-      }
-    })
-    /*
-    
-    this.svgService.overedChange.subscribe(id => {
-      this.selectedId = id
-    })
-    this.svgService.selectedChange.subscribe(id => {
       for (const b of this.config.buildings) {
         if (b.path == id) {
           this.change.emit(b)
@@ -142,36 +138,5 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
         }
       }
     })
-    */
-    /*
-    this.svgService.load()
-      .subscribe(map => {
-        this.roll = map.roll
-        this.shapes = map.shapes
-      })
-    
-    this.svgService.overedChange.subscribe(id => {
-      this.selectedId = id
-    })
-    this.svgService.selectedChange.subscribe(id => {
-      for (const b of this.config.buildings) {
-        if (b.path == id) {
-          this.change.emit(b)
-          break
-        }
-      }
-    })
-    */
   }
-
-  backgroundLoadingProgress: number = 0
-  bgState: "none" | "loading" | "loaded" = "none"
-  backgroundProgress = (event: ProgressEvent): boolean => {
-    if (this.bgState != "loading") {
-      this.bgState = "loading"
-    }
-    this.backgroundLoadingProgress = Math.round(event.loaded / event.total * 100)
-    return true
-  }
-
 }

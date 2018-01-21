@@ -35,17 +35,4 @@ describe('MainSvgService', () => {
     divE = doc.body.appendChild(divE)
     expect(divE.parentNode).toBeTruthy()
   })
-
-  it('should load svg', async(
-    inject([MainSvgService], (service: MainSvgService) => {
-      expect(divE.parentNode).toBeTruthy()
-      service.load(divE).subscribe(
-        svg => {
-          expect(svg).toBeTruthy()
-          expect(divE).toEqual(svg.parentNode)
-
-        }
-      )
-    }
-    )))
 });

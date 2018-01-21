@@ -63,7 +63,6 @@ export class TurnAroundComponent extends ConfigComponent implements OnDestroy {
   private configLayoutSub: Subscription
 
   private framesChangeHandler = (frames: TurnAroundFrame[]) => {
-    console.log("TurnAroundComponent.framesChangeHandler")
     this.setDeactivable(true)
     this.turnAroundFrames = frames
     this.loaderSub = this.loader.load(frames)

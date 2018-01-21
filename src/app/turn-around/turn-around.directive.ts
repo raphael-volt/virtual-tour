@@ -181,13 +181,11 @@ export class TurnAroundDirective implements OnChanges {
     this.downPos = [this.getDownPos(event), this.currentImageIndex]
   }
   private canvasMouseDown = (event: MouseEvent) => {
-    console.log("canvasMouseDown")
     this.updateMousePosition(event)
     this.handleMouseMove(true)
   }
 
   private canvasMouseMove = (event: MouseEvent) => {
-    console.log('canvasMouseMove')
     let cx: number = this.getDownPos(event)
     const delta = (this.downPos[0] - cx) * this.mouseInc
     let i = this.validateIndex(delta + this.downPos[1])

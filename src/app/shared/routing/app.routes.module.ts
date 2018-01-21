@@ -14,30 +14,27 @@ const routes: Routes = [
       {
         path: "batiments/:id",
         component: BuildingComponent,
-        canDeactivate: [AppRoutesGuard]
-      },
-      {
-        path: "test-app",
-        component: TestAppartementComponent
+        canDeactivate: [AppRoutesGuard],
+        canActivate: [AppRoutesGuard]
       },
       {
         path: "video",
         component: YoutubeComponent,
-        canDeactivate: [AppRoutesGuard]
+        canDeactivate: [AppRoutesGuard],
+        canActivate: [AppRoutesGuard]
       },
-      
       {
         path: "images",
         component: CarouselComponent,
-        canDeactivate: [AppRoutesGuard]
+        canDeactivate: [AppRoutesGuard],
+        canActivate: [AppRoutesGuard]
       },
-
       {
         path: "360",
         component: TurnAroundComponent,
-        canDeactivate: [AppRoutesGuard]
+        canDeactivate: [AppRoutesGuard],
+        canActivate: [AppRoutesGuard]
       }
-
     ]
   }
 ]
