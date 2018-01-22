@@ -94,8 +94,9 @@ export class LoaderService {
     const video: HTMLVideoElement = mapItem.event.target
     if (isNaN(mapItem.event.total) || !mapItem.event.total)
       mapItem.event.total = this.getVideoDuration(video)
-
-    const t: number = mapItem.event.total
+      const t: number = mapItem.event.total
+      if(t == 0)
+        return
     mapItem.event.loaded = this.getVideoLoaded(video, t)
     mapItem.observer.next(mapItem.event)
     if (mapItem.event.total && mapItem.event.total == mapItem.event.loaded) {
