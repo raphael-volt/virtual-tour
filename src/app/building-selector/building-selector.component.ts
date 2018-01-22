@@ -77,7 +77,9 @@ export class BuildingSelectorComponent extends ConfigComponent implements AfterV
         .subscribe(event => {
           this.appService.loadingProgress = event.loaded / event.total
         },
-        err => { },
+        err => { 
+          console.log('updateBgUrl/error', err)
+        },
         () => {
           this.appService.loading = false
           addClass(this.bg, "loaded")

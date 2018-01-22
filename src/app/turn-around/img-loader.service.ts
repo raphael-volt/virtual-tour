@@ -2,16 +2,15 @@ import { Injectable } from '@angular/core';
 import { Observable, Observer } from "rxjs";
 import { TurnAround, TurnAroundFrame, Subscription } from "../shared/model";
 import { AppService } from "../app.service";
-import { LoaderEvent, XHRImage } from "../loader.service";
 @Injectable()
 export class ImgLoaderService {
 
   constructor(private appService: AppService) { }
-
+   
   private loading: boolean = false
   private imgList: HTMLImageElement[]
   private urlList: string[]
-  private loaders: XHRImage[]
+  private loaders: HTMLImageElement[]
   private numLoaders: number = 2
   private numLoaded: number
   private numTotal: number
@@ -23,6 +22,7 @@ export class ImgLoaderService {
 
   load(frames: TurnAroundFrame[]): Observable<HTMLImageElement[]> {
     return Observable.create((observer: Observer<HTMLImageElement[]>) => {
+      this.appService.loadingProgress = 0
       this.loading = true
       this.urlList = []
       this.imgList = []
@@ -60,6 +60,29 @@ export class ImgLoaderService {
     })
   }
 
+  private imgProgressHandler = (event: ProgressEvent) => {
+    let img = event.currentTarget as HTMLImageElement
+    let i: number = this.imgList.indexOf(img)
+    this.sizeMap[i] = event.loaded
+    this.updateProgress()
+  }
+  private imgLoadedHandler = (event: Event) => {
+    let img = event.currentTarget as HTMLImageElement
+    img.removeEventListener("load", this.imgLoadedHandler)
+    img.removeEventListener("progress", this.imgProgressHandler)
+    let i: number = this.imgList.indexOf(img)
+    this.sizeMap[i] = this.frames[i].size
+    i = this.loaders.indexOf(img)
+    this.loaders[i] = null
+    this.numLoaded++
+    if (this.numLoaded < this.numTotal) {
+      this.updateProgress()
+      this.nextLoad()
+    }
+    else {
+      this.notifyComplete()
+    }
+  }
   private notifyComplete() {
     this.observer.next(this.imgList)
     this.observer.complete()
@@ -93,36 +116,11 @@ export class ImgLoaderService {
     for (i = 0; i < this.numLoaders; i++) {
       if (this.currentIndex < this.numTotal) {
         if (this.loaders[i] == null) {
-          const img = new Image()
-          const xhr = new XHRImage()
-          this.imgList[this.currentIndex] = img
-          this.loaders[i] = xhr
-          const sub = this.loaders[i].load(
-            img,
-            this.urlList[this.currentIndex++]
-          ).subscribe(event => {
-            let i: number = this.imgList.indexOf(img)
-            this.sizeMap[i] = event.loaded
-            this.updateProgress()
-          },
-            err => {
-
-            },
-            () => {
-              let i: number = this.imgList.indexOf(img)
-              this.sizeMap[i] = this.frames[i].size
-              i = this.loaders.indexOf(xhr)
-              this.loaders[i] = null
-              this.numLoaded++
-              if (this.numLoaded < this.numTotal) {
-                this.updateProgress()
-                this.nextLoad()
-              }
-              else {
-                this.notifyComplete()
-              }
-            }
-          )
+          this.loaders[i] = new Image()
+          this.imgList[this.currentIndex] = this.loaders[i]
+          this.loaders[i].addEventListener("load", this.imgLoadedHandler)
+          this.loaders[i].addEventListener("progress", this.imgProgressHandler)
+          this.loaders[i].src = this.urlList[this.currentIndex++]
         }
       }
     }

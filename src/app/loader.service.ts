@@ -36,9 +36,8 @@ export class LoaderService {
     const isVideo: boolean = (target instanceof HTMLVideoElement)
     const e: LoaderEvent = this.createEvent(target, url, total)
     if (this.getIsCached(url)) {
-      if (isVideo)
-        return this.loadCachedVideo(e)
-      return this.loadCachedImg(e)
+      if (!isVideo)
+        return this.loadCachedImg(e)
     }
     return Observable.create((observer: Observer<LoaderEvent>) => {
       this.addEvent(this.createEvent(target, url, total), observer)
@@ -198,11 +197,13 @@ export class LoaderService {
                 d[1].observer.next(e)
               },
               err => {
+                sub.unsubscribe()
                 delete (this.map[event.url])
                 d[1].observer.error(event)
                 this.calculateProgress()
               },
               () => {
+                sub.unsubscribe()
                 this.cache.push(event.url)
                 d[2] = false
                 this.nextLoad()
@@ -252,7 +253,6 @@ export class LoaderService {
 
   private createImgLoaderData(): ImgLoaderData {
     const xhr: XMLHttpRequest = new XMLHttpRequest()
-    xhr.responseType = "blob"
     return [xhr, null, false]
   }
 
@@ -345,9 +345,10 @@ export class XHRImage {
       let xhr: XMLHttpRequest = this.xhr
       if (!xhr) {
         xhr = new XMLHttpRequest()
-        xhr.responseType = 'blob'
       }
       const error = err => {
+        console.log('XHRImage/loadevent/error')
+        console.error(err)
         unhandle()
         o.error(err)
       }
@@ -373,6 +374,7 @@ export class XHRImage {
           img.src = fr.result
         }
         fr.addEventListener('load', dataDone)
+        
         fr.readAsDataURL(xhr.response)
       }
 
@@ -381,11 +383,11 @@ export class XHRImage {
         xhr.removeEventListener("loadend", loadend)
         xhr.removeEventListener("error", error)
       }
-
       xhr.addEventListener("progress", progress)
       xhr.addEventListener("loadend", loadend)
       xhr.addEventListener("error", error)
       xhr.open('get', loaderEvent.url)
+      xhr.responseType = "blob"
       xhr.send(null)
     })
   }
